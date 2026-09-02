@@ -11,7 +11,8 @@ import { getEmbeddedAsset } from './embeddedAssets';
 import QRCode from 'qrcode';
 import type { DeviceInfo, ProtocolType, RemoteCommand, TVState, WSClientMessage, WSServerMessage } from './types';
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+let activePort = DEFAULT_PORT;
 const PUBLIC_DIR = path.resolve(process.cwd(), 'public');
 
 function getNetworkIp(): string | null {
@@ -28,12 +29,12 @@ function getNetworkIp(): string | null {
   return null;
 }
 
-function printServerBanner(runtime: string) {
+function printServerBanner(runtime: string, port: number = activePort) {
   const netIp = getNetworkIp();
   console.log(`\n🎮 \x1b[1m\x1b[32m[WebMote] Server running via ${runtime}\x1b[0m`);
-  console.log(`   ➜  \x1b[1mLocal:\x1b[0m   http://localhost:${PORT}`);
+  console.log(`   ➜  \x1b[1mLocal:\x1b[0m   http://localhost:${port}`);
   if (netIp) {
-    console.log(`   ➜  \x1b[1mNetwork (Akses dari HP):\x1b[0m \x1b[1m\x1b[36mhttp://${netIp}:${PORT}\x1b[0m`);
+    console.log(`   ➜  \x1b[1mNetwork (Akses dari HP):\x1b[0m \x1b[1m\x1b[36mhttp://${netIp}:${port}\x1b[0m`);
   }
   console.log(`   ➜  Pastikan HP dan Mac Anda terhubung ke jaringan Wi-Fi yang sama.\n`);
 }
@@ -310,136 +311,155 @@ const isBun = typeof (globalThis as any).Bun !== 'undefined';
 if (isBun) {
   // === BUN NATIVE SERVER ENGINE ===
   const Bun = (globalThis as any).Bun;
-  Bun.serve({
-    port: PORT,
-    fetch(req: Request, server: any) {
-      const url = new URL(req.url);
+  let started = false;
 
-      // WebSocket Upgrade
-      if (url.pathname === '/ws') {
-        const success = server.upgrade(req);
-        if (success) return undefined;
-        return new Response('WebSocket upgrade failed', { status: 400 });
-      }
+  for (let p = DEFAULT_PORT; p < DEFAULT_PORT + 20; p++) {
+    try {
+      Bun.serve({
+        port: p,
+        fetch(req: Request, server: any) {
+          const url = new URL(req.url);
 
-      const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      };
+          // WebSocket Upgrade
+          if (url.pathname === '/ws') {
+            const success = server.upgrade(req);
+            if (success) return undefined;
+            return new Response('WebSocket upgrade failed', { status: 400 });
+          }
 
-      if (req.method === 'OPTIONS') {
-        return new Response(null, { headers });
-      }
+          const headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+          };
 
-      if (url.pathname === '/api/status') {
-        return Response.json(tvState, { headers });
-      }
+          if (req.method === 'OPTIONS') {
+            return new Response(null, { headers });
+          }
 
-      if (url.pathname === '/api/reset') {
-        if (currentRemote) currentRemote.disconnect();
-        if (currentAdb) currentAdb.disconnect();
-        currentRemote = null;
-        currentAdb = null;
-        deleteCertificates();
-        updateState({
-          connected: false,
-          activeDevice: null,
-          volume: 0,
-          isMuted: false,
-          currentApp: undefined,
-          statusMessage: 'Kredensial pairing telah direset. Siap koneksi baru.',
-        });
-        return Response.json({ success: true, message: 'Pairing credentials wiped' }, { headers });
-      }
+          if (url.pathname === '/api/status') {
+            return Response.json(tvState, { headers });
+          }
 
-      if (url.pathname === '/api/info') {
-        const netIp = getNetworkIp();
-        const networkUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
-        return Response.json({ port: PORT, localIp: netIp, networkUrl, localUrl: `http://localhost:${PORT}` }, { headers });
-      }
+          if (url.pathname === '/api/reset') {
+            if (currentRemote) currentRemote.disconnect();
+            if (currentAdb) currentAdb.disconnect();
+            currentRemote = null;
+            currentAdb = null;
+            deleteCertificates();
+            updateState({
+              connected: false,
+              activeDevice: null,
+              volume: 0,
+              isMuted: false,
+              currentApp: undefined,
+              statusMessage: 'Kredensial pairing telah direset. Siap koneksi baru.',
+            });
+            return Response.json({ success: true, message: 'Pairing credentials wiped' }, { headers });
+          }
 
-      if (url.pathname === '/api/qr') {
-        const netIp = getNetworkIp();
-        const targetUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
-        return (async () => {
-          try {
-            const svg = await QRCode.toString(targetUrl, {
-              type: 'svg',
-              margin: 1,
-              color: {
-                dark: '#5cd016',
-                light: '#0e0e14',
+          if (url.pathname === '/api/info') {
+            const netIp = getNetworkIp();
+            const networkUrl = netIp ? `http://${netIp}:${p}` : `http://localhost:${p}`;
+            return Response.json({ port: p, localIp: netIp, networkUrl, localUrl: `http://localhost:${p}` }, { headers });
+          }
+
+          if (url.pathname === '/api/qr') {
+            const netIp = getNetworkIp();
+            const targetUrl = netIp ? `http://${netIp}:${p}` : `http://localhost:${p}`;
+            return (async () => {
+              try {
+                const svg = await QRCode.toString(targetUrl, {
+                  type: 'svg',
+                  margin: 1,
+                  color: {
+                    dark: '#5cd016',
+                    light: '#0e0e14',
+                  },
+                });
+                return new Response(svg, {
+                  headers: { ...headers, 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-cache' },
+                });
+              } catch (err: any) {
+                return new Response('Error generating QR', { status: 500 });
+              }
+            })();
+          }
+
+          if (url.pathname === '/api/scan') {
+            const mac = url.searchParams.get('mac') || undefined;
+            return (async () => {
+              const devices = await discoverDevices(mac);
+              lastDiscoveredDevices = devices;
+              broadcast({ type: 'DISCOVERED_DEVICES', devices });
+              return Response.json(devices, { headers });
+            })();
+          }
+
+          // Static files (Disk first, then embedded fallback)
+          const cleanPath = url.pathname === '/' || url.pathname === '' ? '/index.html' : url.pathname;
+          const diskPath = path.join(PUBLIC_DIR, cleanPath.replace(/^\//, ''));
+
+          if (fs.existsSync(diskPath) && fs.statSync(diskPath).isFile()) {
+            const ext = path.extname(diskPath);
+            const contentType = MIME_TYPES[ext] || 'text/plain';
+            const file = Bun.file(diskPath);
+            return new Response(file, {
+              headers: {
+                'Content-Type': contentType,
+                'Cache-Control': 'no-cache',
               },
             });
-            return new Response(svg, {
-              headers: { ...headers, 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-cache' },
-            });
-          } catch (err: any) {
-            return new Response('Error generating QR', { status: 500 });
           }
-        })();
-      }
 
-      if (url.pathname === '/api/scan') {
-        const mac = url.searchParams.get('mac') || undefined;
-        return (async () => {
-          const devices = await discoverDevices(mac);
-          lastDiscoveredDevices = devices;
-          broadcast({ type: 'DISCOVERED_DEVICES', devices });
-          return Response.json(devices, { headers });
-        })();
-      }
+          // Fallback to Embedded Assets inside single binary
+          const embedded = getEmbeddedAsset(cleanPath);
+          if (embedded) {
+            return new Response(embedded.content, {
+              headers: {
+                'Content-Type': embedded.contentType,
+                'Cache-Control': 'no-cache',
+              },
+            });
+          }
 
-      // Static files (Disk first, then embedded fallback)
-      const cleanPath = url.pathname === '/' || url.pathname === '' ? '/index.html' : url.pathname;
-      const diskPath = path.join(PUBLIC_DIR, cleanPath.replace(/^\//, ''));
-
-      if (fs.existsSync(diskPath) && fs.statSync(diskPath).isFile()) {
-        const ext = path.extname(diskPath);
-        const contentType = MIME_TYPES[ext] || 'text/plain';
-        const file = Bun.file(diskPath);
-        return new Response(file, {
-          headers: {
-            'Content-Type': contentType,
-            'Cache-Control': 'no-cache',
+          return new Response('Not Found', { status: 404 });
+        },
+        websocket: {
+          open(ws: any) {
+            handleClientConnected(ws);
           },
-        });
-      }
-
-      // Fallback to Embedded Assets inside single binary
-      const embedded = getEmbeddedAsset(cleanPath);
-      if (embedded) {
-        return new Response(embedded.content, {
-          headers: {
-            'Content-Type': embedded.contentType,
-            'Cache-Control': 'no-cache',
+          message(ws: any, message: any) {
+            try {
+              const data: WSClientMessage = JSON.parse(message.toString());
+              processClientMessage(data);
+            } catch (err) {
+              console.error('[WS] Error processing message:', err);
+            }
           },
-        });
+          close(ws: any) {
+            console.log('[WS] Client disconnected');
+            clients.delete(ws);
+          },
+        },
+      });
+
+      activePort = p;
+      printServerBanner('Bun', p);
+      started = true;
+      break;
+    } catch (err: any) {
+      if (err?.code === 'EADDRINUSE' || String(err).includes('EADDRINUSE') || String(err).includes('port')) {
+        console.log(`[WebMote] Port ${p} sedang digunakan, mencoba port ${p + 1}...`);
+        continue;
       }
+      throw err;
+    }
+  }
 
-      return new Response('Not Found', { status: 404 });
-    },
-    websocket: {
-      open(ws: any) {
-        handleClientConnected(ws);
-      },
-      message(ws: any, message: any) {
-        try {
-          const data: WSClientMessage = JSON.parse(message.toString());
-          processClientMessage(data);
-        } catch (err) {
-          console.error('[WS] Error processing message:', err);
-        }
-      },
-      close(ws: any) {
-        console.log('[WS] Client disconnected');
-        clients.delete(ws);
-      },
-    },
-  });
-
-  printServerBanner('Bun');
+  if (!started) {
+    console.error(`[WebMote] Gagal menemukan port kosong dari ${DEFAULT_PORT} hingga ${DEFAULT_PORT + 20}`);
+  }
 } else {
   // === NODE.JS HTTP & WS SERVER ENGINE (for npm, pnpm, yarn, node) ===
   const server = http.createServer(async (req, res) => {
@@ -485,15 +505,15 @@ if (isBun) {
 
     if (pathname === '/api/info') {
       const netIp = getNetworkIp();
-      const networkUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
+      const networkUrl = netIp ? `http://${netIp}:${activePort}` : `http://localhost:${activePort}`;
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ port: PORT, localIp: netIp, networkUrl, localUrl: `http://localhost:${PORT}` }));
+      res.end(JSON.stringify({ port: activePort, localIp: netIp, networkUrl, localUrl: `http://localhost:${activePort}` }));
       return;
     }
 
     if (pathname === '/api/qr') {
       const netIp = getNetworkIp();
-      const targetUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
+      const targetUrl = netIp ? `http://${netIp}:${activePort}` : `http://localhost:${activePort}`;
       try {
         const svg = await QRCode.toString(targetUrl, {
           type: 'svg',
@@ -587,7 +607,20 @@ if (isBun) {
     });
   });
 
-  server.listen(PORT, () => {
-    printServerBanner('Node.js');
-  });
+  function listenOnPort(p: number, maxAttempts = 20) {
+    server.once('error', (err: any) => {
+      if (err.code === 'EADDRINUSE' && p < DEFAULT_PORT + maxAttempts) {
+        console.log(`[WebMote] Port ${p} sedang digunakan, mencoba port ${p + 1}...`);
+        listenOnPort(p + 1, maxAttempts);
+      } else {
+        console.error(`[WebMote] Server error:`, err);
+      }
+    });
+    server.listen(p, () => {
+      activePort = p;
+      printServerBanner('Node.js', p);
+    });
+  }
+
+  listenOnPort(DEFAULT_PORT);
 }

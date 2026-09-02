@@ -38,10 +38,13 @@ jobs:
 
       - name: Compress Binaries for Release
         run: |
+          chmod +x dist/webmote-*
+          cp start.command dist/
+          cp start.bat dist/
           cd dist
-          zip webmote-macos-arm64.zip webmote-macos-arm64
-          zip webmote-macos-x64.zip webmote-macos-x64
-          zip webmote-windows-x64.zip webmote-windows-x64.exe
+          zip webmote-macos-arm64.zip webmote-macos-arm64 start.command
+          zip webmote-macos-x64.zip webmote-macos-x64 start.command
+          zip webmote-windows-x64.zip webmote-windows-x64.exe start.bat
           zip webmote-linux-x64.zip webmote-linux-x64
           cd ..
 

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import crypto from 'node:crypto';
 import tls from 'node:tls';
 import { AndroidRemote, RemoteKeyCode, RemoteDirection } from 'androidtv-remote';
@@ -234,7 +235,15 @@ import type { RemoteCommand } from './types';
   }
 };
 
-const CERT_STORE_FILE = path.resolve(process.cwd(), '.webmote-certs.json');
+function getCertStoreFile(): string {
+  try {
+    const home = os.homedir();
+    if (home) {
+      return path.join(home, '.webmote-certs.json');
+    }
+  } catch {}
+  return path.resolve(process.cwd(), '.webmote-certs.json');
+}
 
 interface CertStore {
   devices?: Record<string, { cert: any; key: any }>;
@@ -243,9 +252,17 @@ interface CertStore {
 }
 
 function readCertStore(): CertStore {
+  const primaryPath = getCertStoreFile();
+  const localFallbackPath = path.resolve(process.cwd(), '.webmote-certs.json');
+
   try {
-    if (fs.existsSync(CERT_STORE_FILE)) {
-      const content = fs.readFileSync(CERT_STORE_FILE, 'utf-8');
+    if (fs.existsSync(primaryPath)) {
+      const content = fs.readFileSync(primaryPath, 'utf-8');
+      return JSON.parse(content) || {};
+    }
+    // Fallback to local cwd if present
+    if (fs.existsSync(localFallbackPath)) {
+      const content = fs.readFileSync(localFallbackPath, 'utf-8');
       return JSON.parse(content) || {};
     }
   } catch (err) {
@@ -255,8 +272,9 @@ function readCertStore(): CertStore {
 }
 
 function writeCertStore(store: CertStore) {
+  const primaryPath = getCertStoreFile();
   try {
-    fs.writeFileSync(CERT_STORE_FILE, JSON.stringify(store, null, 2), 'utf-8');
+    fs.writeFileSync(primaryPath, JSON.stringify(store, null, 2), 'utf-8');
   } catch (err) {
     console.error('[AndroidRemote] Error writing certificate store:', err);
   }
@@ -285,20 +303,26 @@ export function saveCertificate(ip: string, cert: any) {
 }
 
 export function clearStoredCertificate(ip?: string) {
+  const primaryPath = getCertStoreFile();
+  const localFallbackPath = path.resolve(process.cwd(), '.webmote-certs.json');
+
   try {
-    if (fs.existsSync(CERT_STORE_FILE)) {
-      if (ip) {
-        const store = readCertStore();
-        if (store.devices && store.devices[ip]) {
-          delete store.devices[ip];
-          writeCertStore(store);
-          console.log(`[AndroidRemote] Cleared stored certificate for ${ip}`);
-          return;
-        }
+    if (ip) {
+      const store = readCertStore();
+      if (store.devices && store.devices[ip]) {
+        delete store.devices[ip];
+        writeCertStore(store);
+        console.log(`[AndroidRemote] Cleared stored certificate for ${ip}`);
+        return;
       }
-      fs.unlinkSync(CERT_STORE_FILE);
-      console.log('[AndroidRemote] Cleared all stored certificates (.webmote-certs.json)');
     }
+    if (fs.existsSync(primaryPath)) {
+      fs.unlinkSync(primaryPath);
+    }
+    if (fs.existsSync(localFallbackPath)) {
+      fs.unlinkSync(localFallbackPath);
+    }
+    console.log('[AndroidRemote] Cleared all stored certificates (.webmote-certs.json)');
   } catch {}
 }
 

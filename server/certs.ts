@@ -1,8 +1,15 @@
 import forge from 'node-forge';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 
-const CERT_PATH = path.resolve(process.cwd(), '.webmote-certs.json');
+function getCertPath(): string {
+  try {
+    const home = os.homedir();
+    if (home) return path.join(home, '.webmote-certs.json');
+  } catch {}
+  return path.resolve(process.cwd(), '.webmote-certs.json');
+}
 
 export interface StoredCerts {
   certPem: string;
@@ -10,9 +17,13 @@ export interface StoredCerts {
 }
 
 export function getOrCreateCertificates(): StoredCerts {
+  const primaryPath = getCertPath();
+  const localFallbackPath = path.resolve(process.cwd(), '.webmote-certs.json');
+
   try {
-    if (fs.existsSync(CERT_PATH)) {
-      const data = fs.readFileSync(CERT_PATH, 'utf-8');
+    const filePath = fs.existsSync(primaryPath) ? primaryPath : (fs.existsSync(localFallbackPath) ? localFallbackPath : primaryPath);
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(data);
       if (parsed.certPem && parsed.keyPem) {
         return parsed;
@@ -46,7 +57,7 @@ export function getOrCreateCertificates(): StoredCerts {
 
   const stored: StoredCerts = { certPem, keyPem };
   try {
-    fs.writeFileSync(CERT_PATH, JSON.stringify(stored, null, 2), 'utf-8');
+    fs.writeFileSync(primaryPath, JSON.stringify(stored, null, 2), 'utf-8');
   } catch (err) {
     console.error('[Certs] Failed to save certs file:', err);
   }
@@ -55,9 +66,20 @@ export function getOrCreateCertificates(): StoredCerts {
 }
 
 export function deleteCertificates(): boolean {
+  const primaryPath = getCertPath();
+  const localFallbackPath = path.resolve(process.cwd(), '.webmote-certs.json');
+  let deleted = false;
+
   try {
-    if (fs.existsSync(CERT_PATH)) {
-      fs.unlinkSync(CERT_PATH);
+    if (fs.existsSync(primaryPath)) {
+      fs.unlinkSync(primaryPath);
+      deleted = true;
+    }
+    if (fs.existsSync(localFallbackPath)) {
+      fs.unlinkSync(localFallbackPath);
+      deleted = true;
+    }
+    if (deleted) {
       console.log('[Certs] Deleted stored certificates (.webmote-certs.json)');
       return true;
     }
