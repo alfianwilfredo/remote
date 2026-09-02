@@ -1,314 +1,165 @@
-# 🎮 WebMote - 8-Bit Pixel Android TV Remote
+# WebMote
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](#)
-[![Zero Build](https://img.shields.io/badge/Frontend-Zero--Build%20%3C%2030KB-success.svg)](#)
-[![100% Ad-Free](https://img.shields.io/badge/Ads-100%25%20Bebas%20Iklan-brightgreen.svg)](#)
-[![Multi-Runtime](https://img.shields.io/badge/Runtime-Node.js%20%7C%20Bun-orange.svg)](#)
-[![Package Managers](https://img.shields.io/badge/Supports-NPM%20%7C%20PNPM%20%7C%20Yarn%20%7C%20Bun-blueviolet.svg)](#)
+Web remote control berbasis browser untuk Android TV dan Google TV. Berjalan langsung di jaringan lokal tanpa iklan, tanpa telemetri, dan dengan UI retro 8-bit NES.
 
-Aplikasi remote control web berkecepatan tinggi, **100% bebas iklan (*ad-free*)**, dan berukuran ultra-ringan dengan estetika retro **8-Bit NES / GameBoy** untuk mengontrol **Android TV** & **Google TV** langsung melalui browser laptop atau smartphone di jaringan Wi-Fi yang sama.
+Frontend dibangun tanpa build step (pure HTML5, CSS, dan vanilla JS berukuran < 30 KB), disajikan langsung oleh backend hybrid yang mendukung Node.js dan Bun.
 
 ---
 
-## 📑 Daftar Isi
+## Fitur
 
-- [⚡ Fitur Unggulan](#-fitur-unggulan)
-- [📋 Persyaratan Sistem](#-persyaratan-sistem)
-- [📶 Panduan Jaringan Wi-Fi: 2.4 GHz vs 5 GHz (Dual-Band)](#-panduan-jaringan-wi-fi-24-ghz-vs-5-ghz-dual-band)
-  - [1. Mengapa TV di 2.4 GHz dan HP/Laptop di 5 GHz?](#1-mengapa-tv-di-24-ghz-dan-hplaptop-di-5-ghz)
-  - [2. Bagaimana Komunikasi Berjalan (Subnet Bridging)](#2-bagaimana-komunikasi-berjalan-subnet-bridging)
-  - [3. Masalah Umum Wi-Fi & Cara Mengatasinya](#3-masalah-umum-wi-fi--cara-mengatasinya)
-- [🚀 Cara Instalasi & Menjalankan](#-cara-instalasi--menjalankan)
-  - [1. Menggunakan NPM](#1-menggunakan-npm)
-  - [2. Menggunakan PNPM](#2-menggunakan-pnpm)
-  - [3. Menggunakan Yarn](#3-menggunakan-yarn)
-  - [4. Menggunakan Bun](#4-menggunakan-bun)
-  - [5. Build Standalone Single Binary](#5-build-standalone-single-binary)
-- [📖 Panduan Penggunaan Lengkap (Step-by-Step)](#-panduan-penggunaan-lengkap-step-by-step)
-  - [Langkah 1: Menghubungkan ke Android TV (Pairing PIN)](#langkah-1-menghubungkan-ke-android-tv-pairing-pin)
-  - [Langkah 2: Navigasi & Kontrol TV](#langkah-2-navigasi--kontrol-tv)
-  - [Langkah 3: Mengetik Cepat & Pencarian YouTube](#langkah-3-mengetik-cepat--pencarian-youtube)
-  - [Langkah 4: 1-Klik Peluncuran Aplikasi (App Cartridges)](#langkah-4-1-klik-peluncuran-aplikasi-app-cartridges)
-  - [Langkah 5: Mengatur Efek Retro (CRT & Sound SFX)](#langkah-5-mengatur-efek-retro-crt--sound-sfx)
-- [📱 Akses dari HP & PWA (Install ke Home Screen)](#-akses-dari-hp--pwa-install-ke-home-screen)
-- [⌨ Tabel Shortcut Keyboard Laptop](#-tabel-shortcut-keyboard-laptop)
-- [🔧 Panduan Troubleshooting (Masalah Umum & Solusi)](#-panduan-troubleshooting-masalah-umum--solusi)
-- [📁 Struktur Direktori Proyek](#-struktur-direktori-proyek)
-- [🔒 Privasi & Keamanan](#-privasi--keamanan)
+- **Zero-Build & Ringan:** Payload frontend < 30 KB tanpa framework berat (React, Vite, dan Tailwind dihapus untuk memangkas latensi dan ukuran bundle).
+- **Multi-Runtime:** Berjalan di Node.js (`npm`, `pnpm`, `yarn`) dan `bun`, atau dapat dikompilasi jadi 1 file binary mandiri (`./webmote`).
+- **Protokol Hybrid:** Menggunakan Android TV Remote Protocol v2 (TLS + PIN pairing) dengan fallback ke Wireless ADB (port 5555).
+- **Fast Text Input & YouTube Search:** Mengetik teks panjang langsung ke input box aktif di TV atau mencari video langsung di YouTube TV.
+- **Deep Link App Cartridges:** 1-klik buka aplikasi YouTube, Netflix, Spotify, Disney+ Hotstar, Prime Video, dan Twitch.
+- **Synthesizer Web Audio:** Efek suara retro 8-bit sintetis tanpa memuat file audio eksternal.
+- **PWA Ready:** Tampilan responsif dan bisa di-install ke Home Screen HP agar tampil fullscreen tanpa address bar.
 
 ---
 
-## ⚡ Fitur Unggulan
+## Persyaratan
 
-- **🚫 100% Bebas Iklan & Tanpa Pelacakan:** Tidak ada popup, banner iklan, analitik pihak ketiga, ataupun telemetri internet.
-- **🪶 Ultra-Lightweight (< 30 KB):** Frontend dibangun dengan Pure HTML5, CSS kustom, dan Vanilla JS murni tanpa overhead framework berat (React, Vite, dan Tailwind dieliminasi untuk latensi nol).
-- **⚡ Universal Multi-Runtime:** Berjalan lancar di **Node.js** (`npm`, `pnpm`, `yarn`) maupun **Bun** secara native melalui *Universal Hybrid Engine*.
-- **🎮 Desain Nostalgia 8-Bit NES / GameBoy:**
-  - Dot-Matrix LCD Screen interaktif dengan indikator status live, target IP, active app, dan volume visualizer (meter fosfor 10-blok).
-  - Chunky NES D-Pad ✚ dengan efek tekan 3D stepped-pixel.
-  - Web Audio API Retro SFX (efek suara sintetis retro tanpa file audio eksternal).
-  - Filter garis layar TV tabung retro (CRT Scanlines) dengan tombol toggle On/Off.
-- **⌨ Fast Text Typing & Deep Search:** Ketik teks panjang di laptop/HP dan kirim langsung ke input box aktif di TV, atau cari video langsung di YouTube TV (`▶ YT SEARCH`).
-- **📦 Quick App Cartridges:** 1-klik untuk membuka aplikasi populer (YouTube, Netflix, Spotify, Disney+ Hotstar, Prime Video, Twitch).
-- **📶 Auto-Discovery & Session Persistence:** Scanner Wi-Fi otomatis (mDNS/SSDP/ARP) dan penyimpanan sertifikat pairing X.509 lokal agar koneksi berikutnya terjadi instan.
+- **Node.js** (v18+) atau **Bun** (v1.0+) di laptop/komputer.
+- Laptop/HP dan Android TV terhubung ke **jaringan Wi-Fi / LAN yang sama**.
+- Perangkat berbasis **Android TV** atau **Google TV** (Xiaomi TV, TCL, Sony Bravia, Realme, Chromecast with Google TV, Coocaa, Polytron, dll.).
 
 ---
 
-## 📋 Persyaratan Sistem
+## Quickstart
 
-Sebelum menjalankan WebMote, pastikan:
-1. **Runtime:** Salah satu dari runtime berikut sudah terinstal di komputer Anda:
-   - **Node.js** v18.0.0 atau lebih baru ([Unduh Node.js](https://nodejs.org/)), ATAU
-   - **Bun** v1.0.0 atau lebih baru ([Unduh Bun](https://bun.sh/)).
-2. **Jaringan:** Laptop/komputer dan Android TV terhubung ke **jaringan Wi-Fi / LAN yang sama**.
-3. **Target Perangkat:** TV berbasis **Android TV** atau **Google TV** (Xiaomi TV, TCL, Sony Bravia, Realme, Chromecast with Google TV, Coocaa, Polytron, dll.).
+Clone repositori dan masuk ke direktori:
 
----
-
-## 📶 Panduan Jaringan Wi-Fi: 2.4 GHz vs 5 GHz (Dual-Band)
-
-Banyak pengguna menggunakan router Wi-Fi modern (Dual-Band) di rumah (IndiHome, MyRepublic, Biznet, First Media, XL Home, TP-Link, ASUS, Huawei, ZTE, dll.). Memahami cara kerja frekuensi Wi-Fi sangat penting agar WebMote dapat terhubung ke TV dengan lancar.
-
-```
-                  +-------------------------------------------------+
-                  |          ROUTER WI-FI DUAL-BAND RUMAH           |
-                  |             (Subnet: 192.168.x.x/24)            |
-                  +------------------------+------------------------+
-                                           |
-                 +-------------------------+-------------------------+
-                 | (Jaringan 2.4 GHz)                                | (Jaringan 5 GHz)
-                 v                                                   v
-    +--------------------------+                        +--------------------------+
-    |       Android TV         | <====================> |      Laptop / HP         |
-    |   (IP: <IP_ANDROID_TV>)  |   Komunikasi LAN /     |  (IP: <IP_KOMPUTER_ANDA>)|
-    |  Modul Wi-Fi 2.4 GHz     |   WebSocket & TLS      |   Modul Wi-Fi 5 GHz      |
-    +--------------------------+                        +--------------------------+
-```
-
-### 1. Mengapa TV di 2.4 GHz dan HP/Laptop di 5 GHz?
-* **Smart TV (2.4 GHz):** Mayoritas Smart TV (terutama entry-level & mid-range) hanya memiliki modul Wi-Fi 2.4 GHz karena frekuensi 2.4 GHz memiliki daya tembus dinding yang lebih baik untuk posisi TV yang statis.
-* **Laptop & Smartphone (5 GHz):** Laptop dan HP modern biasanya otomatis terhubung ke frekuensi 5 GHz untuk kecepatan transfer data yang lebih tinggi.
-
-### 2. Bagaimana Komunikasi Berjalan (Subnet Bridging)
-**Apakah Laptop di 5 GHz bisa mengontrol TV di 2.4 GHz?**
-👉 **BISA 100%!** Pada router normal, frekuensi 2.4 GHz dan 5 GHz **dijembatani (*bridged*)** ke dalam subnet IP yang sama (misal sama-sama mendapat IP `192.168.x.xxx` atau `10.x.x.xxx`). Selama kedua perangkat berada di subnet yang sama, WebMote dapat mengirimkan perintah kontrol tanpa masalah.
-
----
-
-### 3. Masalah Umum Wi-Fi & Cara Mengatasinya
-
-| Kondisi / Masalah | Penyebab | Solusi Praktis |
-| :--- | :--- | :--- |
-| **Router Memiliki 2 Nama Wi-Fi Berbeda** *(misal: `NamaWiFi_2.4G` & `NamaWiFi_5G`)* | Sebagian router membatasi komunikasi antar dua nama SSID ini jika fitur bridging tidak aktif. | **Solusi:** Sambungkan Laptop/HP ke nama Wi-Fi yang **sama persis** dengan yang dipakai oleh TV (misal: keduanya disambungkan ke `NamaWiFi_2.4G`). |
-| **Fitur "AP Isolation" / "Client Isolation" Aktif di Router** | Router sengaja mengunci setiap perangkat agar tidak bisa saling "melihat" satu sama lain (sering aktif di router kos/kantor/kafe). | **Solusi:** Masuk ke halaman admin router (biasanya `http://192.168.1.1` atau `http://192.168.0.1`), cari menu **Wireless ➜ Advanced**, dan ubah **AP Isolation** atau **Client Isolation** menjadi **Disabled / Off**. |
-| **Menggunakan Wi-Fi Tamu (*Guest Network*)** | Jaringan *Guest Wi-Fi* memang didesain hanya untuk akses internet dan memblokir seluruh koneksi lokal antar-perangkat. | **Solusi:** Pastikan Laptop, HP, dan Android TV terhubung ke **Wi-Fi Utama**, bukan ke Wi-Fi Tamu (*Guest*). |
-| **mDNS Discovery Terblokir (Auto-Scan Tidak Muncul)** | Beberapa router memblokir paket multicast mDNS antar-frekuensi 2.4G dan 5G sehingga tombol "SCAN WI-FI" tidak menemukan TV. | **Solusi:** Buka menu **`DEVICES`** di WebMote, lalu masukkan alamat IP TV secara **Manual** di kolom input (misal: `192.168.x.x`) dan klik **`CONNECT DEVICE`**. |
-
----
-
-## 🚀 Cara Instalasi & Menjalankan
-
-Clone repositori ini dan masuk ke foldernya:
 ```bash
 git clone https://github.com/alfianwilfredo/remote.git
 cd remote
 ```
 
-Pilih salah satu metode instalasi dan jalankan sesuai package manager favorit Anda:
+Jalankan sesuai package manager yang kamu gunakan:
 
-### 1. Menggunakan NPM
+### Bun (Rekomendasi)
 ```bash
-# Install dependensi
-npm install
-
-# Jalankan mode development
-npm run dev
-
-# Atau jalankan mode produksi
-npm start
-```
-
-### 2. Menggunakan PNPM
-```bash
-# Install dependensi
-pnpm install
-
-# Jalankan mode development
-pnpm dev
-
-# Atau jalankan mode produksi
-pnpm start
-```
-
-### 3. Menggunakan Yarn
-```bash
-# Install dependensi
-yarn install
-
-# Jalankan mode development
-yarn dev
-
-# Atau jalankan mode produksi
-yarn start
-```
-
-### 4. Menggunakan Bun
-```bash
-# Install dependensi
 bun install
-
-# Jalankan mode development (super cepat)
-bun run dev:bun   # atau bun run dev
-
-# Atau jalankan mode produksi
-bun run start:bun # atau bun start
+bun run dev:bun   # atau: bun run dev
 ```
 
----
+### NPM
+```bash
+npm install
+npm run dev
+```
 
-### 5. Build Standalone Single Binary
-Jika Anda ingin membuat **1 file aplikasi mandiri (.exe / binary)** yang dapat langsung dijalankan di komputer lain tanpa perlu menginstal Node.js ataupun Bun:
+### PNPM
+```bash
+pnpm install
+pnpm dev
+```
+
+### Yarn
+```bash
+yarn install
+yarn dev
+```
+
+Buka browser di `http://localhost:3000`.
+
+### Build Binary Mandiri (Standalone Executable)
+Jika ingin membuat 1 file binary executable yang bisa langsung dijalankan tanpa perlu instalasi Node/Bun:
 
 ```bash
 bun run build:binary
-```
-Perintah ini akan meng-compile seluruh backend dan frontend ke dalam satu file executable `./webmote`. Cukup jalankan dengan:
-```bash
 ./webmote
 ```
 
 ---
 
-## 📖 Panduan Penggunaan Lengkap (Step-by-Step)
+## Cara Menghubungkan ke TV (Pairing PIN)
 
-Setelah server berjalan, buka browser di alamat:
-👉 **`http://localhost:3000`**
-
-### Langkah 1: Menghubungkan ke Android TV (Pairing PIN)
-1. Klik tombol **`📺 DEVICES`** di pojok kanan atas toolbar WebMote.
-2. WebMote akan secara otomatis memindai (*scan*) jaringan Wi-Fi untuk mendeteksi Android TV Anda.
-3. Klik tombol **`CONNECT`** pada perangkat TV yang ditemukan di daftar.
-   > **Catatan:** Jika TV tidak muncul otomatis, Anda dapat memasukkan IP TV secara manual (misal: `192.168.x.x`) di kolom input bawah dan klik **`CONNECT DEVICE`**.
-4. Di layar TV Anda akan muncul dialog **"Pairing Request"** dengan kode PIN 6-digit (misal: `471B6C` atau angka 6 digit).
-5. Masukkan kode PIN tersebut ke dalam dialog WebMote di layar laptop/HP Anda, lalu klik **`VERIFY PIN`**.
-6. Selesai! Indikator di layar LCD akan berubah menjadi **`ONLINE`** berwarna hijau dan sertifikat pairing akan tersimpan otomatis.
+1. Pastikan TV menyala dan terhubung ke Wi-Fi yang sama dengan laptop.
+2. Buka `http://localhost:3000`, lalu klik tombol **DEVICES** di toolbar kanan atas.
+3. WebMote akan otomatis memindai TV di jaringan lokal. Klik **CONNECT** pada TV yang ditemukan.
+   - *Catatan:* Jika TV tidak muncul otomatis, masukkan IP TV secara manual (misal: `192.168.x.x`) di kolom input dan klik **CONNECT DEVICE**.
+4. Lihat layar TV Anda, akan muncul dialog permintaan pairing dengan kode PIN 6 karakter (misal: `471B6C`).
+5. Masukkan kode PIN tersebut di dialog WebMote dan klik **VERIFY PIN**.
+6. Status di layar LCD remote akan berubah jadi **ONLINE**. Kredensial pairing tersimpan otomatis di `.webmote-certs.json` sehingga koneksi berikutnya tidak perlu pairing ulang.
 
 ---
 
-### Langkah 2: Navigasi & Kontrol TV
-- **D-Pad ✚:** Gunakan tombol panah **▲ / ▼ / ◀ / ▶** untuk menggeser kursor di layar TV dan tombol tengah **`OK`** untuk memilih menu.
-- **Tombol Sistem Utama:**
-  - **`⏻ POWER`:** Menyalakan atau mematikan (*sleep/wake*) TV.
-  - **`🏠 HOME`:** Kembali ke tampilan beranda Android TV.
-  - **`↩ BACK`:** Kembali ke menu/layar sebelumnya.
-- **Kontrol Audio:**
-  - **`+` / `-`:** Menambah atau mengurangi volume suara.
-  - **`🔇`:** Mematikan (*mute*) atau menyalakan kembali suara TV.
-  - Layar LCD akan menampilkan visualisasi level volume dalam bentuk progress bar fosfor hijau.
-- **Kontrol Media (Playback):**
-  - **`⏯`:** Play / Pause video atau musik.
-  - **`⏪` / `⏩`:** Rewind / Fast Forward media.
+## Catatan Jaringan: Wi-Fi 2.4 GHz vs 5 GHz
+
+Di banyak router rumahan (IndiHome, MyRepublic, Biznet, First Media, dll.), frekuensi 2.4 GHz dan 5 GHz aktif bersamaan:
+
+```
+[ Router Dual-Band ] (Subnet sama: 192.168.x.x)
+    ├── Jaringan 2.4 GHz ──> Android TV (IP: 192.168.x.TV)
+    └── Jaringan 5.0 GHz ──> Laptop / HP (IP: 192.168.x.PC)
+```
+
+- **Apakah laptop di 5 GHz bisa mengontrol TV di 2.4 GHz?**  
+  Bisa. Selama router menjembatani (*bridge*) kedua frekuensi tersebut ke subnet IP yang sama (misal sama-sama `192.168.x.xxx`), komunikasi soket lokal tetap berjalan normal.
+
+- **Kapan masalah koneksi bisa terjadi?**
+  1. **SSID Terpisah & Tidak di-Bridge:** Jika router memisahkan akses antar-SSID, sambungkan laptop/HP ke SSID yang sama dengan TV (misal sama-sama ke `WiFi_2.4G`).
+  2. **AP Isolation / Client Isolation Aktif:** Fitur ini mencegah perangkat di Wi-Fi saling berkomunikasi. Matikan opsi *AP Isolation* di halaman admin router (biasanya `http://192.168.1.1` atau `http://192.168.0.1` ➜ menu *Wireless Advanced*).
+  3. **Guest Network:** Jangan hubungkan TV atau laptop ke Wi-Fi Tamu (*Guest Wi-Fi*) karena jaringan ini memblokir komunikasi lokal.
+  4. **mDNS Terblokir:** Jika auto-scan tidak menemukan TV karena router memblokir paket multicast, masukkan IP TV secara manual di menu **DEVICES**.
 
 ---
 
-### Langkah 3: Mengetik Cepat & Pencarian YouTube
-Mengetik judul video atau film menggunakan remote fisik TV sangat lambat. WebMote menyediakan fitur **Fast Text Input**:
-1. Ketik kalimat pencarian di kotak teks (misal: *"Lofi Hip Hop Chill Beats"*).
-2. **Opsi 1 - Ketik ke TV (`⌨ TYPE TEXT`):** Mengirim seluruh teks langsung ke kotak input yang sedang aktif di TV.
-   - *Tips:* Aktifkan tombol **`AUTO-ENTER: ON`** jika Anda ingin WebMote otomatis menekan Enter setelah mengirim teks.
-3. **Opsi 2 - Cari di YouTube (`▶ YT SEARCH`):** Otomatis membuka aplikasi YouTube TV dan langsung menampilkan hasil pencarian dari teks yang Anda ketik!
+## Shortcut Keyboard Laptop
+
+Kamu bisa mengontrol TV langsung menggunakan keyboard laptop:
+
+| Tombol | Aksi Remote |
+| :--- | :--- |
+| `↑` `↓` `←` `→` | Navigasi D-Pad |
+| `Enter` / `Space` | Select / OK |
+| `Escape` / `Backspace` / `B` | Back / Kembali |
+| `H` | Home Screen |
+| `+` / `-` | Volume Up / Down |
+| `M` | Mute / Unmute |
+| `P` | Power (Sleep / Wake) |
+
+*Shortcut dinonaktifkan otomatis saat kursor aktif di input teks.*
 
 ---
 
-### Langkah 4: 1-Klik Peluncuran Aplikasi (App Cartridges)
-Di bagian bawah terdapat tombol cartridge retro untuk meluncurkan aplikasi populer secara instan:
-- **`YT` YOUTUBE** (`vnd.youtube.launch://`)
-- **`NF` NETFLIX** (`netflix://`)
-- **`SP` SPOTIFY** (`spotify://`)
-- **`D+` DISNEY+** (`hotstar://`)
-- **`PV` PRIME** (`https://app.primevideo.com`)
-- **`TW` TWITCH** (`twitch://`)
+## Mengetik Teks & Cari di YouTube
+
+1. Ketik teks di kolom **FAST TEXT INPUT**.
+2. **TYPE TEXT:** Mengirim seluruh teks langsung ke kotak input yang sedang aktif di TV. Aktifkan **AUTO-ENTER: ON** jika ingin otomatis menekan Enter setelah teks terkirim.
+3. **YT SEARCH:** Otomatis membuka aplikasi YouTube TV dan mencari video sesuai kata kunci yang diketik.
 
 ---
 
-### Langkah 5: Mengatur Efek Retro (CRT & Sound SFX)
-Pada toolbar atas, Anda dapat menyesuaikan tampilan & efek audio:
-- **`CRT:ON / OFF`:** Mengaktifkan atau mematikan efek filter garis scanline TV tabung retro.
-- **`SFX:ON / OFF`:** Mengaktifkan atau membisukan efek suara sintetis 8-bit (*blip/bleep*) saat tombol ditekan.
+## Akses dari Smartphone (PWA)
 
----
+WebMote bisa diakses dari HP (iPhone / Android) yang terhubung ke Wi-Fi yang sama:
 
-## 📱 Akses dari HP & PWA (Install ke Home Screen)
-
-WebMote dapat dibuka langsung melalui browser smartphone (iPhone / Android) yang terhubung ke jaringan Wi-Fi yang sama:
-
-1. Saat server dijalankan di Mac/komputer, perhatikan baris alamat jaringan yang muncul di terminal, contoh:
+1. Jalankan server di komputer, lalu perhatikan IP lokal yang tercetak di terminal:
    ```
    🎮 [WebMote] Server running via Bun
       ➜  Local:   http://localhost:3000
-      ➜  Network (Akses dari HP): http://<IP_KOMPUTER_ANDA>:3000
+      ➜  Network: http://<IP_KOMPUTER_ANDA>:3000
    ```
-2. Buka browser di HP Anda (Safari, Chrome, Firefox, dll.).
-3. Masukkan alamat IP komputer tersebut (misal: **`http://192.168.x.x:3000`**).
-4. WebMote akan langsung terbuka dengan tampilan layar sentuh yang responsif.
-
-### 💡 Pasang Sebagai Aplikasi Fullscreen (PWA):
-- **Di iPhone (Safari):** Tekan tombol **Share** (ikon kotak panah ke atas) ➜ pilih **"Add to Home Screen"** (Tambah ke Layar Utama).
-- **Di Android (Chrome):** Tekan menu **titik tiga (⋮)** di pojok kanan atas ➜ pilih **"Install app"** atau **"Add to Home screen"**.
-- Sekarang Anda memiliki remote TV 8-bit tanpa iklan langsung di layar utama HP Anda tanpa address bar browser!
+2. Buka browser di HP dan akses URL jaringan tersebut (misal: `http://192.168.x.x:3000`).
+3. **Install ke Home Screen (Fullscreen):**
+   - **iOS (Safari):** Tekan icon Share ➜ **Add to Home Screen**.
+   - **Android (Chrome):** Tekan menu titik tiga ➜ **Install app** / **Add to Home screen**.
 
 ---
 
-## ⌨ Tabel Shortcut Keyboard Laptop
+## Troubleshooting
 
-Anda dapat mengontrol TV secara langsung menggunakan keyboard fisik laptop tanpa perlu mengklik mouse:
-
-| Tombol Keyboard | Aksi Remote TV | Keterangan |
-| :--- | :--- | :--- |
-| `Panah Atas (↑)` | D-Pad UP | Navigasi kursor ke atas |
-| `Panah Bawah (↓)` | D-Pad DOWN | Navigasi kursor ke bawah |
-| `Panah Kiri (←)` | D-Pad LEFT | Navigasi kursor ke kiri |
-| `Panah Kanan (→)` | D-Pad RIGHT | Navigasi kursor ke kanan |
-| `Enter` atau `Space` | Select / OK | Memilih atau mengonfirmasi menu |
-| `Escape` / `Backspace` / `B` | BACK | Kembali ke layar sebelumnya |
-| `H` atau `h` | HOME | Kembali ke Beranda Android TV |
-| `+` atau `=` | VOLUME UP | Menambah volume suara |
-| `-` atau `_` | VOLUME DOWN | Mengurangi volume suara |
-| `M` atau `m` | MUTE | Mematikan / menyalakan suara |
-| `P` atau `p` | POWER | Menyalakan / mematikan TV (Sleep/Wake) |
-
-> *Catatan:* Shortcut keyboard dinonaktifkan secara otomatis saat kursor sedang berada di dalam kolom input teks agar tidak mengganggu pengetikan.
-
----
-
-## 🔧 Panduan Troubleshooting (Masalah Umum & Solusi)
-
-### 1. TV Tidak Ditemukan Saat Menekan "SCAN WI-FI"
-- **Penyebab:** Router Wi-Fi Anda mungkin memblokir paket mDNS/Multicast antar-frekuensi 2.4 GHz dan 5 GHz, atau fitur *AP Isolation* aktif.
-- **Solusi:** 
-  1. Cari tahu IP TV Anda melalui menu TV: **Settings ➜ Network & Internet ➜ Wi-Fi yang terhubung ➜ IP Address** (misal: `192.168.x.x`).
-  2. Buka dialog **`DEVICES`** di WebMote.
-  3. Masukkan IP tersebut ke form **"IP OR MAC ADDRESS"** dan klik **`CONNECT DEVICE`**.
-  4. Periksa apakah Laptop dan TV terhubung ke Wi-Fi yang sama (lihat [Panduan Wi-Fi Dual-Band](#-panduan-jaringan-wi-fi-24-ghz-vs-5-ghz-dual-band)).
-
-### 2. Kode PIN Salah atau Sesi Pairing Kedaluwarsa
-- **Penyebab:** Kode PIN di TV memiliki batas waktu (biasanya 30-60 detik).
-- **Solusi:**
-  1. Klik tombol **`🔄 MINTA PIN BARU`** yang ada di dalam dialog PIN.
-  2. TV akan memunculkan kode PIN baru.
-  3. Masukkan kode baru tersebut dan tekan **`VERIFY PIN`**.
-
-### 3. TV Pernah Terhubung Tapi Sekarang Gagal Konek (Reset Sertifikat)
-- **Penyebab:** Data sertifikat lama di TV telah kedaluwarsa atau terhapus di salah satu sisi.
-- **Solusi:**
-  1. Buka menu **`DEVICES`** ➜ klik **`⚙ BRIDGE SERVER SETTINGS`**.
-  2. Klik tombol merah **`🗑 HAPUS KREDENSIAL PAIRING`**.
-  3. Lakukan koneksi ulang dan masukkan PIN baru dari layar TV.
-
-### 4. Port 3000 Sedang Digunakan (Port in Use)
-- Jika port 3000 sudah dipakai oleh aplikasi lain, Anda dapat menentukan port lain dengan mudah melalui environment variable `PORT`:
+- **TV tidak ditemukan saat auto-scan:**  
+  Cek IP TV di menu TV (**Settings ➜ Network & Internet ➜ Wi-Fi ➜ IP Address**), lalu masukkan IP tersebut secara manual di menu **DEVICES** WebMote.
+- **PIN pairing salah atau kedaluwarsa:**  
+  Klik tombol **MINTA PIN BARU** di dialog PIN WebMote untuk men-trigger kode baru di layar TV.
+- **Gagal konek ke TV yang sebelumnya sudah pernah terhubung:**  
+  Buka menu **DEVICES ➜ BRIDGE SERVER SETTINGS ➜ HAPUS KREDENSIAL PAIRING**, lalu lakukan koneksi dan pairing ulang dari awal.
+- **Port 3000 bentrok dengan aplikasi lain:**  
+  Ganti port menggunakan environment variable:
   ```bash
-  # Menjalankan di port 3005
   PORT=3005 npm run dev
   # atau
   PORT=3005 bun run dev
@@ -316,39 +167,31 @@ Anda dapat mengontrol TV secara langsung menggunakan keyboard fisik laptop tanpa
 
 ---
 
-## 📁 Struktur Direktori Proyek
+## Struktur Proyek
 
 ```
 remote/
-├── public/                 # Zero-Build Static Frontend (< 30 KB)
-│   ├── index.html          # Markup semantik 8-bit NES remote chassis & modal dialog
-│   ├── style.css           # Desain CSS token NES, border pixel 3D, & CRT scanlines
-│   ├── app.js              # WebSocket client, Web Audio SFX synth, & event handlers
-│   ├── favicon.svg         # Favicon retro pixel
-│   └── manifest.json       # PWA manifest untuk instalasi di smartphone
-├── server/                 # Universal Hybrid Backend
-│   ├── index.ts            # Server tunggal (Bun.serve & Node http/ws dual-engine)
-│   ├── androidRemote.ts    # Engine Android TV Remote Protocol v2 (TLS socket)
-│   ├── adbController.ts    # Controller Wireless ADB fallback (Port 5555)
-│   ├── discovery.ts        # Scanner subnet otomatis (mDNS, SSDP, & probe ARP)
-│   ├── certs.ts            # Manajer sertifikat TLS X.509 (.webmote-certs.json)
-│   ├── keycodes.ts         # Pemetaan keycode Android TV
-│   └── types.ts            # Definisi TypeScript server
-├── PRD.md                  # Dokumen Product Requirement Document
-├── README.md               # Dokumentasi resmi proyek
-└── package.json            # Konfigurasi dependensi & script multi-runtime
+├── public/                 # Static frontend (< 30 KB, zero-build)
+│   ├── index.html          # Markup layout NES & modal dialog
+│   ├── style.css           # Styling pixel art, token NES, & CRT overlay
+│   ├── app.js              # WebSocket client, Web Audio SFX, & event handler
+│   ├── favicon.svg         # Favicon retro
+│   └── manifest.json       # Web app manifest untuk PWA mobile
+├── server/                 # Backend bridge hybrid
+│   ├── index.ts            # Entrypoint server (Bun.serve & Node http/ws)
+│   ├── androidRemote.ts    # Engine Android TV Remote Protocol v2
+│   ├── adbController.ts    # Fallback Wireless ADB (port 5555)
+│   ├── discovery.ts        # Scanner jaringan lokal (mDNS, SSDP, ARP probe)
+│   ├── certs.ts            # Manajemen sertifikat TLS (.webmote-certs.json)
+│   ├── keycodes.ts         # Android keycodes mapping
+│   └── types.ts            # Type definitions
+├── PRD.md                  # Product Requirement Document
+├── README.md               # Dokumentasi proyek
+└── package.json            # Scripts & dependencies
 ```
 
 ---
 
-## 🔒 Privasi & Keamanan
+## Lisensi
 
-- **Zero-Telemetry:** WebMote tidak mengirimkan satu byte data pun ke server cloud pihak ketiga.
-- **Direct LAN Communication:** Seluruh komunikasi berjalan langsung secara lokal antara komputer/HP Anda dan TV melalui port aman TLS v2 (`6467`/`6466`) atau socket WebSocket lokal (`:3000/ws`).
-- **Open Source & Auditable:** Kode sumber 100% transparan dan dapat diaudit secara bebas.
-
----
-
-<p align="center">
-  Dibuat dengan ❤️ untuk pengalaman menonton TV yang bebas gangguan dan berkecepatan tinggi.
-</p>
+MIT License. Bebas digunakan dan dimodifikasi untuk kebutuhan pribadi maupun pengembangan lebih lanjut.
