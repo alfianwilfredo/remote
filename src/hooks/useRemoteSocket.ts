@@ -241,16 +241,27 @@ export function useRemoteSocket() {
   }, [send, wsConnected]);
 
   const scanDevices = useCallback(
-    (targetMac?: string) => {
+    async (targetMac?: string) => {
       setIsScanning(true);
       sfx.playMove();
 
       if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
         send({ type: 'SCAN', text: targetMac });
-      } else {
-        setTimeout(() => {
-          setIsScanning(false);
-        }, 600);
+      }
+
+      try {
+        const host = window.location.hostname || 'localhost';
+        const res = await fetch(`http://${host}:3001/api/scan${targetMac ? `?mac=${encodeURIComponent(targetMac)}` : ''}`);
+        if (res.ok) {
+          const devices: DeviceInfo[] = await res.json();
+          if (Array.isArray(devices) && devices.length > 0) {
+            setDiscoveredDevices(devices);
+          }
+        }
+      } catch (err) {
+        console.warn('[useRemoteSocket] Direct API scan error:', err);
+      } finally {
+        setIsScanning(false);
       }
     },
     [send, wsConnected]

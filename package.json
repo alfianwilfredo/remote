@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"bun run server/index.ts\" \"vite\"",
-    "server": "bun run server/index.ts",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"bun --watch server/index.ts\" \"vite\"",
+    "server": "bun --watch server/index.ts",
     "client": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

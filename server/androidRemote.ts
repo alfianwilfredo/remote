@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import tls from 'node:tls';
 import { AndroidRemote, RemoteKeyCode, RemoteDirection } from 'androidtv-remote';
 import { PairingManager } from 'androidtv-remote/dist/pairing/PairingManager.js';
+import { RemoteManager } from 'androidtv-remote/dist/remote/RemoteManager.js';
 import { pairingMessageManager } from 'androidtv-remote/dist/pairing/PairingMessageManager.js';
 import { remoteMessageManager } from 'androidtv-remote/dist/remote/RemoteMessageManager.js';
 import CryptoJS from 'crypto-js';
@@ -81,6 +83,154 @@ import type { RemoteCommand } from '../types/remote';
     const secretMsg = (pairingMessageManager as any).createPairingSecret(hash_array);
     this.client.write(secretMsg);
     return true;
+  }
+};
+
+// --- PERSISTENT KEEPALIVE & BACKGROUND STABILITY PATCH FOR REMOTEMANAGER ---
+// Prevents Android TV TLS disconnection when switching tabs or when Mac is idle.
+(RemoteManager.prototype as any).start = function () {
+  const self = this;
+  self.isManualStopping = false;
+
+  return new Promise((resolve, reject) => {
+    if (self.pingInterval) {
+      clearInterval(self.pingInterval);
+      self.pingInterval = null;
+    }
+
+    const options = {
+      key: self.certs.key,
+      cert: self.certs.cert,
+      port: self.port,
+      host: self.host,
+      rejectUnauthorized: false,
+    };
+
+    console.log(`[RemoteManager] Establishing TLS connection to ${self.host}:${self.port}...`);
+    self.client = tls.connect(options, () => {
+      // TLS socket connected
+    });
+
+    if (self.client) {
+      self.client.setKeepAlive(true, 3000);
+      self.client.setTimeout(60000);
+    }
+
+    self.client.on('timeout', () => {
+      console.log(`[RemoteManager] Socket idle heartbeat for ${self.host}...`);
+      try {
+        if (self.client && !self.client.destroyed) {
+          self.client.write(remoteMessageManager.createRemotePingResponse(0));
+        }
+      } catch {
+        // ignore
+      }
+    });
+
+    self.client.on('secureConnect', () => {
+      console.log(`[RemoteManager] ✓ TV TLS Connection ACTIVE at ${self.host}:${self.port}`);
+
+      if (self.pingInterval) {
+        clearInterval(self.pingInterval);
+      }
+
+      // Proactive 4-second heartbeat keepalive so TV never drops the session
+      self.pingInterval = setInterval(() => {
+        try {
+          if (self.client && !self.client.destroyed) {
+            self.client.write(remoteMessageManager.createRemotePingResponse(0));
+          }
+        } catch {
+          // ignore
+        }
+      }, 4000);
+
+      resolve(true);
+    });
+
+    self.client.on('data', (data: any) => {
+      const buffer = Buffer.from(data);
+      self.chunks = Buffer.concat([self.chunks, buffer]);
+
+      if (self.chunks.length > 0 && self.chunks.readInt8(0) === self.chunks.length - 1) {
+        try {
+          const message = remoteMessageManager.parse(self.chunks);
+
+          if (message.remoteConfigure) {
+            self.client.write(
+              remoteMessageManager.createRemoteConfigure(
+                622,
+                'Build.MODEL',
+                'Build.MANUFACTURER',
+                1,
+                'Build.VERSION.RELEASE'
+              )
+            );
+            self.emit('ready');
+          } else if (message.remoteSetActive) {
+            self.client.write(remoteMessageManager.createRemoteSetActive(622));
+          } else if (message.remotePingRequest) {
+            self.client.write(
+              remoteMessageManager.createRemotePingResponse(message.remotePingRequest.val1)
+            );
+          } else if (message.remoteImeKeyInject) {
+            self.emit('current_app', message.remoteImeKeyInject.appInfo?.appPackage);
+          } else if (message.remoteStart) {
+            self.emit('powered', message.remoteStart.started);
+          } else if (message.remoteSetVolumeLevel) {
+            self.emit('volume', {
+              level: message.remoteSetVolumeLevel.volumeLevel,
+              maximum: message.remoteSetVolumeLevel.volumeMax,
+              muted: message.remoteSetVolumeLevel.volumeMuted,
+            });
+          } else if (message.remoteError) {
+            self.emit('error', { error: message.remoteError });
+          }
+        } catch (err) {
+          console.warn('[RemoteManager] Parse message error:', err);
+        }
+
+        self.chunks = Buffer.from([]);
+      }
+    });
+
+    self.client.on('close', async (hasError: boolean) => {
+      console.log(`[RemoteManager] TV Connection closed (hasError=${hasError})`);
+      if (self.pingInterval) {
+        clearInterval(self.pingInterval);
+        self.pingInterval = null;
+      }
+
+      if (self.isManualStopping) {
+        return;
+      }
+
+      // Safe auto-reconnect backoff (2.5 seconds)
+      await new Promise((r) => setTimeout(r, 2500));
+      if (!self.isManualStopping) {
+        self.start().catch((e: any) => {
+          console.warn('[RemoteManager] Auto-reconnect retry error:', e?.message || e);
+        });
+      }
+    });
+
+    self.client.on('error', (error: any) => {
+      console.warn(`[RemoteManager] Socket error on ${self.host}:`, error?.message || error);
+      self.error = error;
+    });
+  });
+};
+
+(RemoteManager.prototype as any).stop = function () {
+  this.isManualStopping = true;
+  if (this.pingInterval) {
+    clearInterval(this.pingInterval);
+    this.pingInterval = null;
+  }
+  if (this.client) {
+    try {
+      this.client.destroy();
+    } catch {}
   }
 };
 

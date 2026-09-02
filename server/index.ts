@@ -188,6 +188,8 @@ async function handlePin(pin: string) {
   }
 }
 
+let lastDiscoveredDevices: DeviceInfo[] = [];
+
 // Start Bun native server
 const server = Bun.serve({
   port: PORT,
@@ -235,6 +237,8 @@ const server = Bun.serve({
       const mac = url.searchParams.get('mac') || undefined;
       return (async () => {
         const devices = await discoverDevices(mac);
+        lastDiscoveredDevices = devices;
+        broadcast({ type: 'DISCOVERED_DEVICES', devices });
         return Response.json(devices, { headers });
       })();
     }
@@ -251,6 +255,14 @@ const server = Bun.serve({
           state: tvState,
         })
       );
+      if (lastDiscoveredDevices.length > 0) {
+        ws.send(
+          JSON.stringify({
+            type: 'DISCOVERED_DEVICES',
+            devices: lastDiscoveredDevices,
+          })
+        );
+      }
     },
     message(ws, message) {
       try {
@@ -307,7 +319,8 @@ const server = Bun.serve({
             break;
           case 'SCAN':
             discoverDevices(data.text).then((devices) => {
-              ws.send(JSON.stringify({ type: 'DISCOVERED_DEVICES', devices }));
+              lastDiscoveredDevices = devices;
+              broadcast({ type: 'DISCOVERED_DEVICES', devices });
             });
             break;
         }

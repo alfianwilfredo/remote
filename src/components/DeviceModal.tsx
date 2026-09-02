@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, Tv, KeyRound, RefreshCw, Server, Check } from 'lucide-react';
 import type { DeviceInfo, ProtocolType } from '../types/remote';
 import { sfx } from '../utils/sfx';
@@ -51,6 +51,12 @@ export const DeviceModal: React.FC<DeviceModalProps> = ({
   const [customBridgeInput, setCustomBridgeInput] = useState(bridgeUrl);
   const [bridgeSavedToast, setBridgeSavedToast] = useState(false);
   const [wipeConfirmedToast, setWipeConfirmedToast] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && discoveredDevices.length === 0) {
+      onScan();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
