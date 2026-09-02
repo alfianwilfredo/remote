@@ -12,15 +12,17 @@ Jika kamu bukan programmer dan tidak ingin menginstal Node.js/Bun atau mengetik 
 
 ### Opsi A: Menggunakan File Standalone (.exe / Binary Siap Pakai)
 1. Unduh file aplikasi mandiri dari [Halaman Releases](https://github.com/alfianwilfredo/remote/releases):
-   - **Windows:** Unduh **`webmote-windows-x64.exe`**
+   - **Windows:** Unduh **`webmote-windows-x64.exe`** (atau `webmote-windows-x64.zip`)
    - **Mac Apple Silicon (M1/M2/M3/M4):** Unduh **`webmote-macos-arm64.zip`**
    - **Mac Intel:** Unduh **`webmote-macos-x64.zip`**
-2. **Klik dua kali (*Double-Click*)** file yang sudah diunduh.
+   - **Linux (Ubuntu/Debian/Fedora/Arch):** Unduh **`webmote-linux-x64.zip`**
+2. **Klik dua kali (*Double-Click*)** file yang sudah diunduh atau jalankan `start.command` / `start.bat` / `start.sh`.
 3. Browser akan otomatis terbuka sendiri ke tampilan remote!
 
 ### Opsi B: Menggunakan File Script 1-Klik di Repo Ini
 1. **Pengguna Mac:** Cukup klik dua kali (*Double-Click*) file **`start.command`**.
 2. **Pengguna Windows:** Cukup klik dua kali (*Double-Click*) file **`start.bat`**.
+3. **Pengguna Linux:** Jalankan file **`start.sh`**.
 
 ---
 

@@ -17,16 +17,74 @@ const PUBLIC_DIR = path.resolve(process.cwd(), 'public');
 
 function getNetworkIp(): string | null {
   const interfaces = os.networkInterfaces();
+  const candidates: { ip: string; score: number }[] = [];
+
+  const VIRTUAL_BLACKLIST = [
+    'vethernet',
+    'virtualbox',
+    'vmware',
+    'hyper-v',
+    'wsl',
+    'tailscale',
+    'zerotier',
+    'docker',
+    'loopback',
+    'tun',
+    'tap',
+    'utun',
+    'dummy',
+  ];
+
   for (const name of Object.keys(interfaces)) {
+    const lowerName = name.toLowerCase();
+    const isVirtual = VIRTUAL_BLACKLIST.some((v) => lowerName.includes(v));
+
     const netList = interfaces[name];
     if (!netList) continue;
+
     for (const netInfo of netList) {
-      if (netInfo.family === 'IPv4' && !netInfo.internal) {
-        return netInfo.address;
+      if (netInfo.family === 'IPv4' && !netInfo.internal && netInfo.address) {
+        let score = 0;
+
+        // Heavy penalty for virtual / tunnel adapters
+        if (isVirtual) {
+          score -= 500;
+        }
+
+        // Favor Wi-Fi and primary physical interfaces
+        if (
+          lowerName.includes('wi-fi') ||
+          lowerName.includes('wlan') ||
+          lowerName.includes('wireless') ||
+          lowerName === 'en0' ||
+          lowerName === 'wlan0' ||
+          lowerName === 'eth0' ||
+          lowerName.includes('ethernet')
+        ) {
+          score += 200;
+        }
+
+        // Subnet priority: standard home LAN
+        if (netInfo.address.startsWith('192.168.')) {
+          score += 150;
+        } else if (netInfo.address.startsWith('10.')) {
+          score += 100;
+        } else if (netInfo.address.startsWith('172.')) {
+          const secondOctet = parseInt(netInfo.address.split('.')[1] || '0', 10);
+          if (secondOctet >= 16 && secondOctet <= 31) {
+            score += 50;
+          }
+        }
+
+        candidates.push({ ip: netInfo.address, score });
       }
     }
   }
-  return null;
+
+  if (candidates.length === 0) return null;
+
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0].ip;
 }
 
 function printServerBanner(runtime: string, port: number = activePort) {
