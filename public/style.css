@@ -377,6 +377,47 @@ body {
   gap: 6px;
 }
 
+.btn-voice {
+  padding: 6px 8px;
+  background-color: #24242e;
+  color: var(--crt-cyan);
+  border: 2px solid #000;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.btn-voice:hover {
+  background-color: #3b3b4a;
+  color: #fff;
+}
+
+.btn-voice:active {
+  transform: translateY(1px);
+}
+
+.btn-voice.listening {
+  background-color: var(--nes-red);
+  color: #fff;
+  animation: voicePulse 1s infinite alternate;
+}
+
+@keyframes voicePulse {
+  0% {
+    box-shadow: 0 0 4px rgba(216, 40, 0, 0.6);
+    filter: brightness(1);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(252, 188, 0, 0.9);
+    filter: brightness(1.25);
+  }
+}
+
 .btn-yt {
   flex: 1;
   padding: 6px;

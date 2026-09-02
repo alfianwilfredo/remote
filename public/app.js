@@ -150,6 +150,67 @@ class RetroAudioEngine {
       osc.stop(now + 0.2);
     } catch {}
   }
+
+  playVoiceStart() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.setValueAtTime(783.99, now + 0.06);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.14);
+    } catch {}
+  }
+
+  playVoiceSuccess() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.setValueAtTime(659.25, now + 0.05);
+      osc.frequency.setValueAtTime(783.99, now + 0.1);
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.22);
+    } catch {}
+  }
+
+  playVoiceError() {
+    if (this.muted) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.setValueAtTime(146.83, now + 0.08);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } catch {}
+  }
 }
 
 const sfx = new RetroAudioEngine();
@@ -199,6 +260,9 @@ const el = {
   formTextInput: document.getElementById('formTextInput'),
   inputFastText: document.getElementById('inputFastText'),
   btnClearText: document.getElementById('btnClearText'),
+  btnVoiceSearch: document.getElementById('btnVoiceSearch'),
+  voiceIcon: document.getElementById('voiceIcon'),
+  voiceLabel: document.getElementById('voiceLabel'),
   btnYtSearch: document.getElementById('btnYtSearch'),
   btnSendText: document.getElementById('btnSendText'),
 
@@ -589,6 +653,105 @@ function wipeCredentials() {
   closeModal();
 }
 
+// --- 6.5 Web Speech API Voice Search Engine ---
+class RetroSpeechEngine {
+  constructor() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    this.isSupported = Boolean(SpeechRecognition);
+    this.recognition = null;
+    this.isListening = false;
+
+    if (this.isSupported) {
+      this.recognition = new SpeechRecognition();
+      this.recognition.continuous = false;
+      this.recognition.interimResults = true;
+      // Default to user locale or Indonesian
+      this.recognition.lang = navigator.language?.startsWith('id') ? 'id-ID' : 'id-ID';
+
+      this.recognition.onstart = () => {
+        this.isListening = true;
+        sfx.playVoiceStart();
+        if (el.btnVoiceSearch) {
+          el.btnVoiceSearch.classList.add('listening');
+          if (el.voiceLabel) el.voiceLabel.textContent = 'LISTENING';
+        }
+        if (el.inputFastText) {
+          el.inputFastText.placeholder = '🎙 Bicara sekarang...';
+        }
+      };
+
+      this.recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript && el.inputFastText) {
+          el.inputFastText.value = transcript;
+          el.btnClearText.classList.add('visible');
+        }
+
+        // When speech is final
+        if (event.results[0] && event.results[0].isFinal) {
+          const finalQuery = event.results[0][0].transcript.trim();
+          if (finalQuery) {
+            sfx.playVoiceSuccess();
+            if (state.autoEnter) {
+              sendText(finalQuery, 'type', true);
+            }
+          }
+        }
+      };
+
+      this.recognition.onerror = (event) => {
+        console.warn('[VoiceEngine] Speech recognition error:', event.error);
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          sfx.playVoiceError();
+        }
+        this.stop();
+      };
+
+      this.recognition.onend = () => {
+        this.stop();
+      };
+    }
+  }
+
+  toggle() {
+    if (!this.isSupported) {
+      alert('Browser Anda belum mendukung Web Speech API. Silakan gunakan Chrome, Edge, atau Safari.');
+      return;
+    }
+
+    if (this.isListening) {
+      this.stop();
+    } else {
+      try {
+        this.recognition.start();
+      } catch (err) {
+        console.error('[VoiceEngine] Start failed:', err);
+      }
+    }
+  }
+
+  stop() {
+    this.isListening = false;
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch {}
+    }
+    if (el.btnVoiceSearch) {
+      el.btnVoiceSearch.classList.remove('listening');
+      if (el.voiceLabel) el.voiceLabel.textContent = 'VOICE';
+    }
+    if (el.inputFastText) {
+      el.inputFastText.placeholder = 'Ketik judul / pencarian...';
+    }
+  }
+}
+
+const voiceEngine = new RetroSpeechEngine();
+
 // --- 7. Event Listeners Setup ---
 function setupEventListeners() {
   // Remote Buttons
@@ -628,7 +791,13 @@ function setupEventListeners() {
     openModal();
   });
 
-  // Fast Text Input
+  // Fast Text Input & Voice Search
+  if (el.btnVoiceSearch) {
+    el.btnVoiceSearch.addEventListener('click', () => {
+      voiceEngine.toggle();
+    });
+  }
+
   el.inputFastText.addEventListener('input', () => {
     el.btnClearText.classList.toggle('visible', Boolean(el.inputFastText.value));
   });

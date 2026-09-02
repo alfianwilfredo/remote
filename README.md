@@ -11,6 +11,7 @@ Frontend dibangun tanpa build step (pure HTML5, CSS, dan vanilla JS berukuran < 
 - **Zero-Build & Ringan:** Payload frontend < 30 KB tanpa framework berat (React, Vite, dan Tailwind dihapus untuk memangkas latensi dan ukuran bundle).
 - **Multi-Runtime:** Berjalan di Node.js (`npm`, `pnpm`, `yarn`) dan `bun`, atau dapat dikompilasi jadi 1 file binary mandiri (`./webmote`).
 - **Protokol Hybrid:** Menggunakan Android TV Remote Protocol v2 (TLS + PIN pairing) dengan fallback ke Wireless ADB (port 5555).
+- **Voice Search (Speech-to-Text):** Bicara langsung ke mic HP atau laptop untuk mencari video di YouTube atau mengetik ke TV secara instan via Web Speech API native.
 - **Fast Text Input & YouTube Search:** Mengetik teks panjang langsung ke input box aktif di TV atau mencari video langsung di YouTube TV.
 - **Deep Link App Cartridges:** 1-klik buka aplikasi YouTube, Netflix, Spotify, Disney+ Hotstar, Prime Video, dan Twitch.
 - **Synthesizer Web Audio:** Efek suara retro 8-bit sintetis tanpa memuat file audio eksternal.
@@ -124,11 +125,19 @@ Kamu bisa mengontrol TV langsung menggunakan keyboard laptop:
 
 ---
 
-## Mengetik Teks & Cari di YouTube
+## Voice Search, Mengetik Teks & Cari di YouTube
 
-1. Ketik teks di kolom **FAST TEXT INPUT**.
-2. **TYPE TEXT:** Mengirim seluruh teks langsung ke kotak input yang sedang aktif di TV. Aktifkan **AUTO-ENTER: ON** jika ingin otomatis menekan Enter setelah teks terkirim.
-3. **YT SEARCH:** Otomatis membuka aplikasi YouTube TV dan mencari video sesuai kata kunci yang diketik.
+1. **Voice Search (`🎙 VOICE`):**
+   - Klik tombol **`🎙 VOICE`** dan izinkan akses mikrofon browser saat diminta.
+   - Tombol akan berkedip merah (**LISTENING...**) dan nada blip pembuka akan berbunyi.
+   - Bicara kata kunci yang diinginkan (misal: *"Lofi hip hop"* atau *"Film aksi"*).
+   - Suara Anda akan langsung diubah jadi teks secara real-time. Begitu selesai bicara, teks otomatis terisi di kolom input.
+   - Klik **`▶ YT SEARCH`** untuk langsung mencari di YouTube TV atau **`⌨ TYPE TEXT`** untuk mengetik ke TV.
+2. **Ketik Teks Manual (`⌨ TYPE TEXT`):**
+   - Ketik kalimat di kolom input, lalu tekan Enter atau klik **`⌨ TYPE TEXT`** untuk mengirim seluruh teks ke input box yang aktif di TV.
+   - Aktifkan toggle **`AUTO-ENTER: ON`** jika ingin WebMote otomatis menekan Enter setelah teks terkirim.
+3. **Cari YouTube Langsung (`▶ YT SEARCH`):**
+   - Ketik atau ucapkan kata kunci, lalu klik **`▶ YT SEARCH`** untuk otomatis membuka YouTube TV dan menampilkan hasil pencarian video.
 
 ---
 
@@ -198,7 +207,6 @@ remote/
 2. **Hanya Berjalan di Jaringan Lokal (LAN):** Tidak bisa mengontrol TV dari luar rumah via internet atau paket data seluler, karena komunikasi berjalan murni secara lokal (peer-to-peer LAN) tanpa server cloud perantara.
 3. **Komputer Host Harus Tetap Menyala:** Karena browser web melarang koneksi langsung raw TCP/TLS socket ke perangkat lokal (kebijakan keamanan browser), server backend bridge (`bun` atau `node`) harus tetap aktif di komputer/laptop untuk menjembatani browser/HP ke TV.
 4. **Power-On Hanya Berfungsi Saat TV Standby:** Tombol Power hanya bisa menyalakan TV jika TV berada dalam kondisi *Standby/Sleep* (modul Wi-Fi TV masih aktif). Jika kabel colokan TV dicabut atau TV mati total (*Cold Boot*), modul Wi-Fi TV mati sehingga TV harus dinyalakan manual atau via remote fisik inframerah.
-5. **Belum Ada Voice Search:** Belum mendukung transmisi stream audio mikrofon browser ke Google Assistant TV.
 
 ---
 

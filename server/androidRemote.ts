@@ -8,6 +8,7 @@ import { RemoteManager } from 'androidtv-remote/dist/remote/RemoteManager.js';
 import { pairingMessageManager } from 'androidtv-remote/dist/pairing/PairingMessageManager.js';
 import { remoteMessageManager } from 'androidtv-remote/dist/remote/RemoteMessageManager.js';
 import CryptoJS from 'crypto-js';
+import forge from 'node-forge';
 import type { RemoteCommand } from './types';
 
 // --- BUN COMPATIBILITY PATCH FOR PAIRINGMANAGER ---
@@ -30,8 +31,8 @@ import type { RemoteCommand } from './types';
     } catch (err) {
       console.warn('[PairingManager] Falling back to forge for client cert:', err);
       const forgeCert = forge.pki.certificateFromPem(this.certs.cert);
-      clientModulusHex = forgeCert.publicKey.n.toString(16).toUpperCase();
-      clientExponentHex = '0' + forgeCert.publicKey.e.toString(16);
+      clientModulusHex = (forgeCert.publicKey as any).n.toString(16).toUpperCase();
+      clientExponentHex = '0' + (forgeCert.publicKey as any).e.toString(16);
     }
   }
 
@@ -287,6 +288,8 @@ const KEYCODE_MAP: Record<RemoteCommand, number> = {
   PLAY_PAUSE: RemoteKeyCode.KEYCODE_MEDIA_PLAY_PAUSE,
   FAST_FORWARD: RemoteKeyCode.KEYCODE_MEDIA_FAST_FORWARD,
   REWIND: RemoteKeyCode.KEYCODE_MEDIA_REWIND,
+  VOICE_ASSIST: (RemoteKeyCode as any).KEYCODE_VOICE_ASSIST || 231,
+  SEARCH: (RemoteKeyCode as any).KEYCODE_SEARCH || 84,
 };
 
 export class AndroidTVRemoteV2 {

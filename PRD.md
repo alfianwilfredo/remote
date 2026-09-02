@@ -71,8 +71,9 @@ Pengguna dapat mengontrol TV secara langsung menggunakan keyboard fisik laptop:
 * `M` : Mute / Unmute
 * `P` : Power Sleep / Wake
 
-### 3.4 Fast Text Typing & Search Bar
+### 3.4 Voice Search, Fast Text Typing & Search Bar
 * Mengatasi masalah lambatnya mengetik huruf satu per satu menggunakan D-pad di TV.
+* **Voice Search (Speech-to-Text):** Pengenalan suara langsung via mikrofon browser menggunakan native Web Speech API (`id-ID` & `en-US`), mentranskripsikan suara secara real-time ke input box dengan SFX sintetis retro.
 * **Direct Type Text:** Ketik kalimat di laptop/HP lalu tekan *Enter* / *Type Text* untuk mengirim seluruh teks langsung ke input box aktif di TV (didukung toggle *Auto-Enter*).
 * **YouTube Deep Search:** Tombol instan `▶ YT SEARCH` untuk langsung mencari video di aplikasi YouTube TV.
 
@@ -86,7 +87,7 @@ Tombol cartridge 1-klik untuk meluncurkan aplikasi populer secara instan:
 * Twitch (`twitch://` / `tv.twitch.android.app`)
 
 ### 3.6 Multi-Device & Mobile Access (PWA)
-* Dapat diakses dari smartphone (iOS / Android) di Wi-Fi yang sama melalui browser mobile (`http://<IP_MAC>:3000`).
+* Dapat diakses dari smartphone (iOS / Android) di Wi-Fi yang sama melalui browser mobile (`http://<IP_KOMPUTER_ANDA>:3000`).
 * Mendukung instalasi PWA (*Add to Home Screen*) untuk tampilan full-screen layaknya aplikasi native tanpa address bar browser.
 
 ---
@@ -109,7 +110,6 @@ Tombol cartridge 1-klik untuk meluncurkan aplikasi populer secara instan:
 * **Ketergantungan Local LAN:** Komunikasi berjalan peer-to-peer di jaringan lokal tanpa dukungan cloud relay ke internet publik.
 * **Kebutuhan Server Host:** Browser tidak memiliki API raw TCP/TLS socket ke IP lokal, sehingga server bridge (Node/Bun) harus tetap aktif di host.
 * **Power-On Standby Only:** Tombol power hanya dapat membangunkan TV saat dalam mode Sleep/Standby (tidak dapat menyalakan TV dari kondisi Cold Boot / colokan mati).
-* **No Voice Assistant Streaming:** Belum mendukung transmisi audio mikrofon browser ke Google Assistant TV.
 
 ---
 

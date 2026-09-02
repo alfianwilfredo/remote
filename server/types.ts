@@ -13,7 +13,9 @@ export type RemoteCommand =
   | 'MUTE'
   | 'PLAY_PAUSE'
   | 'FAST_FORWARD'
-  | 'REWIND';
+  | 'REWIND'
+  | 'VOICE_ASSIST'
+  | 'SEARCH';
 
 export type ProtocolType = 'v2' | 'adb' | 'mock';
 
