@@ -72,7 +72,7 @@ Banyak pengguna menggunakan router Wi-Fi modern (Dual-Band) di rumah (IndiHome, 
 ```
                   +-------------------------------------------------+
                   |          ROUTER WI-FI DUAL-BAND RUMAH           |
-                  |             (Subnet: 192.168.1.1/24)            |
+                  |             (Subnet: 192.168.x.x/24)            |
                   +------------------------+------------------------+
                                            |
                  +-------------------------+-------------------------+
@@ -80,7 +80,7 @@ Banyak pengguna menggunakan router Wi-Fi modern (Dual-Band) di rumah (IndiHome, 
                  v                                                   v
     +--------------------------+                        +--------------------------+
     |       Android TV         | <====================> |      Laptop / HP         |
-    |   (IP: 192.168.1.25)     |   Komunikasi LAN /     |    (IP: 192.168.1.3)     |
+    |   (IP: <IP_ANDROID_TV>)  |   Komunikasi LAN /     |  (IP: <IP_KOMPUTER_ANDA>)|
     |  Modul Wi-Fi 2.4 GHz     |   WebSocket & TLS      |   Modul Wi-Fi 5 GHz      |
     +--------------------------+                        +--------------------------+
 ```
@@ -91,7 +91,7 @@ Banyak pengguna menggunakan router Wi-Fi modern (Dual-Band) di rumah (IndiHome, 
 
 ### 2. Bagaimana Komunikasi Berjalan (Subnet Bridging)
 **Apakah Laptop di 5 GHz bisa mengontrol TV di 2.4 GHz?**
-👉 **BISA 100%!** Pada router normal, frekuensi 2.4 GHz dan 5 GHz **dijembatani (*bridged*)** ke dalam subnet IP yang sama (misal sama-sama mendapat IP `192.168.1.xxx`). Selama kedua perangkat berada di subnet yang sama, WebMote dapat mengirimkan perintah kontrol tanpa masalah.
+👉 **BISA 100%!** Pada router normal, frekuensi 2.4 GHz dan 5 GHz **dijembatani (*bridged*)** ke dalam subnet IP yang sama (misal sama-sama mendapat IP `192.168.x.xxx` atau `10.x.x.xxx`). Selama kedua perangkat berada di subnet yang sama, WebMote dapat mengirimkan perintah kontrol tanpa masalah.
 
 ---
 
@@ -99,10 +99,10 @@ Banyak pengguna menggunakan router Wi-Fi modern (Dual-Band) di rumah (IndiHome, 
 
 | Kondisi / Masalah | Penyebab | Solusi Praktis |
 | :--- | :--- | :--- |
-| **Router Memiliki 2 Nama Wi-Fi Berbeda** *(misal: `MyWiFi_2.4G` & `MyWiFi_5G`)* | Sebagian router membatasi komunikasi antar dua nama SSID ini jika fitur bridging tidak aktif. | **Solusi:** Sambungkan Laptop/HP ke nama Wi-Fi yang **sama persis** dengan yang dipakai oleh TV (misal: keduanya disambungkan ke `MyWiFi_2.4G`). |
-| **Fitur "AP Isolation" / "Client Isolation" Aktif di Router** | Router sengaja mengunci setiap perangkat agar tidak bisa saling "melihat" satu sama lain (sering aktif di router kos/kantor/kafe). | **Solusi:** Masuk ke halaman admin router (biasanya `http://192.168.1.1`), cari menu **Wireless ➜ Advanced**, dan ubah **AP Isolation** atau **Client Isolation** menjadi **Disabled / Off**. |
+| **Router Memiliki 2 Nama Wi-Fi Berbeda** *(misal: `NamaWiFi_2.4G` & `NamaWiFi_5G`)* | Sebagian router membatasi komunikasi antar dua nama SSID ini jika fitur bridging tidak aktif. | **Solusi:** Sambungkan Laptop/HP ke nama Wi-Fi yang **sama persis** dengan yang dipakai oleh TV (misal: keduanya disambungkan ke `NamaWiFi_2.4G`). |
+| **Fitur "AP Isolation" / "Client Isolation" Aktif di Router** | Router sengaja mengunci setiap perangkat agar tidak bisa saling "melihat" satu sama lain (sering aktif di router kos/kantor/kafe). | **Solusi:** Masuk ke halaman admin router (biasanya `http://192.168.1.1` atau `http://192.168.0.1`), cari menu **Wireless ➜ Advanced**, dan ubah **AP Isolation** atau **Client Isolation** menjadi **Disabled / Off**. |
 | **Menggunakan Wi-Fi Tamu (*Guest Network*)** | Jaringan *Guest Wi-Fi* memang didesain hanya untuk akses internet dan memblokir seluruh koneksi lokal antar-perangkat. | **Solusi:** Pastikan Laptop, HP, dan Android TV terhubung ke **Wi-Fi Utama**, bukan ke Wi-Fi Tamu (*Guest*). |
-| **mDNS Discovery Terblokir (Auto-Scan Tidak Muncul)** | Beberapa router memblokir paket multicast mDNS antar-frekuensi 2.4G dan 5G sehingga tombol "SCAN WI-FI" tidak menemukan TV. | **Solusi:** Buka menu **`DEVICES`** di WebMote, lalu masukkan alamat IP TV secara **Manual** di kolom input (misal: `192.168.1.20`) dan klik **`CONNECT DEVICE`**. |
+| **mDNS Discovery Terblokir (Auto-Scan Tidak Muncul)** | Beberapa router memblokir paket multicast mDNS antar-frekuensi 2.4G dan 5G sehingga tombol "SCAN WI-FI" tidak menemukan TV. | **Solusi:** Buka menu **`DEVICES`** di WebMote, lalu masukkan alamat IP TV secara **Manual** di kolom input (misal: `192.168.x.x`) dan klik **`CONNECT DEVICE`**. |
 
 ---
 
@@ -188,7 +188,7 @@ Setelah server berjalan, buka browser di alamat:
 1. Klik tombol **`📺 DEVICES`** di pojok kanan atas toolbar WebMote.
 2. WebMote akan secara otomatis memindai (*scan*) jaringan Wi-Fi untuk mendeteksi Android TV Anda.
 3. Klik tombol **`CONNECT`** pada perangkat TV yang ditemukan di daftar.
-   > **Catatan:** Jika TV tidak muncul otomatis, Anda dapat memasukkan IP TV secara manual (misal: `192.168.1.20`) di kolom input bawah dan klik **`CONNECT DEVICE`**.
+   > **Catatan:** Jika TV tidak muncul otomatis, Anda dapat memasukkan IP TV secara manual (misal: `192.168.x.x`) di kolom input bawah dan klik **`CONNECT DEVICE`**.
 4. Di layar TV Anda akan muncul dialog **"Pairing Request"** dengan kode PIN 6-digit (misal: `471B6C` atau angka 6 digit).
 5. Masukkan kode PIN tersebut ke dalam dialog WebMote di layar laptop/HP Anda, lalu klik **`VERIFY PIN`**.
 6. Selesai! Indikator di layar LCD akan berubah menjadi **`ONLINE`** berwarna hijau dan sertifikat pairing akan tersimpan otomatis.
@@ -246,10 +246,10 @@ WebMote dapat dibuka langsung melalui browser smartphone (iPhone / Android) yang
    ```
    🎮 [WebMote] Server running via Bun
       ➜  Local:   http://localhost:3000
-      ➜  Network (Akses dari HP): http://192.168.1.3:3000
+      ➜  Network (Akses dari HP): http://<IP_KOMPUTER_ANDA>:3000
    ```
 2. Buka browser di HP Anda (Safari, Chrome, Firefox, dll.).
-3. Masukkan alamat IP tersebut (misal: **`http://192.168.1.3:3000`**).
+3. Masukkan alamat IP komputer tersebut (misal: **`http://192.168.x.x:3000`**).
 4. WebMote akan langsung terbuka dengan tampilan layar sentuh yang responsif.
 
 ### 💡 Pasang Sebagai Aplikasi Fullscreen (PWA):
@@ -286,7 +286,7 @@ Anda dapat mengontrol TV secara langsung menggunakan keyboard fisik laptop tanpa
 ### 1. TV Tidak Ditemukan Saat Menekan "SCAN WI-FI"
 - **Penyebab:** Router Wi-Fi Anda mungkin memblokir paket mDNS/Multicast antar-frekuensi 2.4 GHz dan 5 GHz, atau fitur *AP Isolation* aktif.
 - **Solusi:** 
-  1. Cari tahu IP TV Anda melalui menu TV: **Settings ➜ Network & Internet ➜ Wi-Fi yang terhubung ➜ IP Address** (misal: `192.168.1.25`).
+  1. Cari tahu IP TV Anda melalui menu TV: **Settings ➜ Network & Internet ➜ Wi-Fi yang terhubung ➜ IP Address** (misal: `192.168.x.x`).
   2. Buka dialog **`DEVICES`** di WebMote.
   3. Masukkan IP tersebut ke form **"IP OR MAC ADDRESS"** dan klik **`CONNECT DEVICE`**.
   4. Periksa apakah Laptop dan TV terhubung ke Wi-Fi yang sama (lihat [Panduan Wi-Fi Dual-Band](#-panduan-jaringan-wi-fi-24-ghz-vs-5-ghz-dual-band)).
