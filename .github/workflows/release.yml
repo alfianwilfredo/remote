@@ -1,0 +1,60 @@
+name: Build & Release Standalone Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Standalone Binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Bundle Embedded Frontend Assets
+        run: bun run bundle:assets
+
+      - name: Build All Standalone Binaries
+        run: |
+          mkdir -p dist
+          bun build --compile --target=bun-darwin-arm64 server/index.ts --outfile dist/webmote-macos-arm64
+          bun build --compile --target=bun-darwin-x64 server/index.ts --outfile dist/webmote-macos-x64
+          bun build --compile --target=bun-windows-x64 server/index.ts --outfile dist/webmote-windows-x64.exe
+          bun build --compile --target=bun-linux-x64 server/index.ts --outfile dist/webmote-linux-x64
+
+      - name: Compress Binaries for Release
+        run: |
+          cd dist
+          zip webmote-macos-arm64.zip webmote-macos-arm64
+          zip webmote-macos-x64.zip webmote-macos-x64
+          zip webmote-windows-x64.zip webmote-windows-x64.exe
+          zip webmote-linux-x64.zip webmote-linux-x64
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            dist/webmote-windows-x64.exe
+            dist/webmote-windows-x64.zip
+            dist/webmote-macos-arm64.zip
+            dist/webmote-macos-x64.zip
+            dist/webmote-linux-x64.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true

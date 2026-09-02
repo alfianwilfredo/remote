@@ -8,7 +8,13 @@
     "dev:bun": "bun --watch server/index.ts",
     "start": "tsx server/index.ts",
     "start:bun": "bun server/index.ts",
-    "build:binary": "bun build --compile server/index.ts --outfile webmote",
+    "bundle:assets": "bun scripts/bundle-assets.ts",
+    "build:binary": "bun scripts/bundle-assets.ts && bun build --compile server/index.ts --outfile webmote",
+    "build:mac-arm64": "bun scripts/bundle-assets.ts && bun build --compile --target=bun-darwin-arm64 server/index.ts --outfile dist/webmote-macos-arm64",
+    "build:mac-x64": "bun scripts/bundle-assets.ts && bun build --compile --target=bun-darwin-x64 server/index.ts --outfile dist/webmote-macos-x64",
+    "build:windows": "bun scripts/bundle-assets.ts && bun build --compile --target=bun-windows-x64 server/index.ts --outfile dist/webmote-windows-x64.exe",
+    "build:linux": "bun scripts/bundle-assets.ts && bun build --compile --target=bun-linux-x64 server/index.ts --outfile dist/webmote-linux-x64",
+    "build:all": "bun scripts/bundle-assets.ts && bun run build:mac-arm64 && bun run build:mac-x64 && bun run build:windows && bun run build:linux",
     "build": "tsc"
   },
   "dependencies": {

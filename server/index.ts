@@ -7,6 +7,7 @@ import { AndroidTVRemoteV2 } from './androidRemote';
 import { ADBController } from './adbController';
 import { discoverDevices } from './discovery';
 import { deleteCertificates } from './certs';
+import { getEmbeddedAsset } from './embeddedAssets';
 import QRCode from 'qrcode';
 import type { DeviceInfo, ProtocolType, RemoteCommand, TVState, WSClientMessage, WSServerMessage } from './types';
 
@@ -390,7 +391,7 @@ if (isBun) {
         })();
       }
 
-      // Static files
+      // Static files (Disk first, then embedded fallback)
       const cleanPath = url.pathname === '/' || url.pathname === '' ? '/index.html' : url.pathname;
       const diskPath = path.join(PUBLIC_DIR, cleanPath.replace(/^\//, ''));
 
@@ -401,6 +402,17 @@ if (isBun) {
         return new Response(file, {
           headers: {
             'Content-Type': contentType,
+            'Cache-Control': 'no-cache',
+          },
+        });
+      }
+
+      // Fallback to Embedded Assets inside single binary
+      const embedded = getEmbeddedAsset(cleanPath);
+      if (embedded) {
+        return new Response(embedded.content, {
+          headers: {
+            'Content-Type': embedded.contentType,
             'Cache-Control': 'no-cache',
           },
         });
@@ -525,6 +537,17 @@ if (isBun) {
         'Cache-Control': 'no-cache',
       });
       fs.createReadStream(diskPath).pipe(res);
+      return;
+    }
+
+    // Fallback to Embedded Assets inside single binary
+    const embedded = getEmbeddedAsset(cleanPath);
+    if (embedded) {
+      res.writeHead(200, {
+        'Content-Type': embedded.contentType,
+        'Cache-Control': 'no-cache',
+      });
+      res.end(embedded.content);
       return;
     }
 

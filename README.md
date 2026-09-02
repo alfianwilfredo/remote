@@ -6,18 +6,29 @@ Frontend dibangun tanpa build step (pure HTML5, CSS, dan vanilla JS berukuran < 
 
 ---
 
-## 🟢 Cara Pakai Cepat (Untuk Orang Awam / Tanpa Koding)
+## 🟢 Cara Pakai Cepat (Untuk Orang Awam / Tanpa Koding & Tanpa Node/Bun)
 
-Jika kamu bukan programmer dan tidak ingin membuka terminal atau mengetik kode, gunakan cara 3-langkah ini:
+Jika kamu bukan programmer dan tidak ingin menginstal Node.js/Bun atau mengetik perintah di terminal:
 
-1. **Jalankan Aplikasi dengan 1-Klik:**
-   - **Pengguna Mac:** Cukup klik dua kali (*Double-Click*) file **`start.command`**.
-   - **Pengguna Windows:** Cukup klik dua kali (*Double-Click*) file **`start.bat`**.
-   - *Browser laptop kamu akan otomatis terbuka sendiri ke tampilan remote.*
-2. **Buka di HP (Scan QR Code):**
+### Opsi A: Menggunakan File Standalone (.exe / Binary Siap Pakai)
+1. Unduh file aplikasi mandiri dari [Halaman Releases](https://github.com/alfianwilfredo/remote/releases):
+   - **Windows:** Unduh **`webmote-windows-x64.exe`**
+   - **Mac Apple Silicon (M1/M2/M3/M4):** Unduh **`webmote-macos-arm64.zip`**
+   - **Mac Intel:** Unduh **`webmote-macos-x64.zip`**
+2. **Klik dua kali (*Double-Click*)** file yang sudah diunduh.
+3. Browser akan otomatis terbuka sendiri ke tampilan remote!
+
+### Opsi B: Menggunakan File Script 1-Klik di Repo Ini
+1. **Pengguna Mac:** Cukup klik dua kali (*Double-Click*) file **`start.command`**.
+2. **Pengguna Windows:** Cukup klik dua kali (*Double-Click*) file **`start.bat`**.
+
+---
+
+### Langkah Selanjutnya (Buka di HP & Hubungkan ke TV):
+1. **Buka di HP (Scan QR Code):**
    - Di layar laptop, klik tombol **`📱 HP`** di pojok kanan atas.
    - Arahkan kamera HP ke QR Code yang muncul di layar untuk langsung membuka remote di smartphone.
-3. **Hubungkan ke TV:**
+2. **Hubungkan ke TV:**
    - Klik tombol **`📺 DEVICES`** ➜ klik **`CONNECT`** pada TV Anda.
    - Masukkan 6-digit kode PIN yang muncul di layar TV Anda, lalu klik **`VERIFY PIN`**. Selesai!
 
@@ -25,9 +36,11 @@ Jika kamu bukan programmer dan tidak ingin membuka terminal atau mengetik kode, 
 
 ## Fitur
 
-- **Zero-Build & Ringan:** Payload frontend < 30 KB tanpa framework berat (React, Vite, dan Tailwind dihapus untuk memangkas latensi dan ukuran bundle).
-- **Multi-Runtime:** Berjalan di Node.js (`npm`, `pnpm`, `yarn`) dan `bun`, atau dapat dikompilasi jadi 1 file binary mandiri (`./webmote`).
+- **True Single-File Executable:** Dapat berjalan langsung sebagai 1 file binary mandiri (`.exe` / native binary) tanpa membutuhkan Node.js, Bun, NPM, atau dependensi eksternal apapun di komputer.
+- **Zero-Build & Ringan:** Payload frontend < 30 KB tanpa framework berat (React, Vite, dan Tailwind dieliminasi untuk memangkas latensi dan ukuran bundle).
+- **Multi-Runtime:** Berjalan di Node.js (`npm`, `pnpm`, `yarn`) dan `bun`, atau dikompilasi jadi binary mandiri (`./webmote`).
 - **Protokol Hybrid:** Menggunakan Android TV Remote Protocol v2 (TLS + PIN pairing) dengan fallback ke Wireless ADB (port 5555).
+- **Scan QR Code HP:** Cukup scan QR code di layar laptop dengan kamera smartphone untuk langsung membuka remote di HP tanpa perlu mengetik IP.
 - **Voice Search (Speech-to-Text):** Bicara langsung ke mic HP atau laptop untuk mencari video di YouTube atau mengetik ke TV secara instan via Web Speech API native.
 - **Fast Text Input & YouTube Search:** Mengetik teks panjang langsung ke input box aktif di TV atau mencari video langsung di YouTube TV.
 - **Deep Link App Cartridges:** 1-klik buka aplikasi YouTube, Netflix, Spotify, Disney+ Hotstar, Prime Video, dan Twitch.
@@ -38,7 +51,8 @@ Jika kamu bukan programmer dan tidak ingin membuka terminal atau mengetik kode, 
 
 ## Persyaratan
 
-- **Node.js** (v18+) atau **Bun** (v1.0+) di laptop/komputer.
+- **Untuk Standalone Executable (`.exe` / Binary):** **TIDAK PERLU** install apapun! Cukup jalankan filenya.
+- **Untuk Mode Development (Source Code):** **Node.js** (v18+) atau **Bun** (v1.0+).
 - Laptop/HP dan Android TV terhubung ke **jaringan Wi-Fi / LAN yang sama**.
 - Perangkat berbasis **Android TV** atau **Google TV** (Xiaomi TV, TCL, Sony Bravia, Realme, Chromecast with Google TV, Coocaa, Polytron, dll.).
 
