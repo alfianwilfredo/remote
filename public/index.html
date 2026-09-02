@@ -45,6 +45,9 @@
         <button id="btnToggleSfx" class="btn-micro active-sfx" title="Toggle 8-Bit Web Audio SFX">
           <span>SFX:ON</span>
         </button>
+        <button id="btnOpenMobileQr" class="btn-micro btn-mobile-qr" title="Buka di HP via Scan QR Code">
+          <span>📱 HP</span>
+        </button>
         <button id="btnOpenDevices" class="btn-micro btn-devices" title="Open TV Devices Setup">
           <span>📺 DEVICES</span>
         </button>
@@ -386,6 +389,40 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile QR Code Modal Dialog -->
+  <div id="mobileQrModal" class="modal-backdrop" role="dialog" aria-modal="true" style="display: none;">
+    <div class="modal-window pixel-border-outer" style="max-width: 320px; text-align: center;">
+      <div class="modal-header">
+        <div class="modal-title font-pixel">
+          <span>📱 BUKA DI SMARTPHONE</span>
+        </div>
+        <button id="btnCloseQrModal" class="modal-btn-close font-pixel" title="Close modal">✕</button>
+      </div>
+
+      <div style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <p class="font-silkscreen" style="font-size: 10px; color: var(--phosphor-green); line-height: 1.4; margin: 0;">
+          Arahkan kamera HP Anda ke QR Code di bawah untuk langsung mengontrol TV:
+        </p>
+
+        <!-- QR Code Container -->
+        <div id="qrImageContainer" class="pixel-border-sm" style="background: #0e0e14; padding: 10px; border: 2px solid #000; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+          <img id="imgQrCode" src="/api/qr" alt="QR Code WebMote" style="width: 156px; height: 156px; image-rendering: pixelated; display: block;" />
+        </div>
+
+        <div style="background: #111116; border: 1px solid #333; padding: 6px 8px; width: 100%; box-sizing: border-box;">
+          <div class="font-pixel" style="font-size: 8px; color: var(--arcade-gold); margin-bottom: 2px;">ALAMAT URL HP:</div>
+          <div id="textNetworkUrl" class="font-silkscreen" style="font-size: 11px; color: var(--crt-cyan); word-break: break-all;">
+            Memuat URL...
+          </div>
+        </div>
+
+        <p class="font-silkscreen" style="font-size: 9px; color: #888899; margin: 0;">
+          *Pastikan HP dan Komputer Anda terhubung ke Wi-Fi yang sama.
+        </p>
       </div>
     </div>
   </div>

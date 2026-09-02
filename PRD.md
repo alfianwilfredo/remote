@@ -86,7 +86,8 @@ Tombol cartridge 1-klik untuk meluncurkan aplikasi populer secara instan:
 * Prime Video (`https://app.primevideo.com` / `com.amazon.amazonvideo.livingroom`)
 * Twitch (`twitch://` / `tv.twitch.android.app`)
 
-### 3.6 Multi-Device & Mobile Access (PWA)
+### 3.6 Multi-Device & Mobile Access (PWA & QR Code)
+* **Instant Mobile QR Code:** Menampilkan QR Code retro di layar laptop untuk di-scan langsung menggunakan kamera smartphone tanpa perlu mengetik alamat IP secara manual.
 * Dapat diakses dari smartphone (iOS / Android) di Wi-Fi yang sama melalui browser mobile (`http://<IP_KOMPUTER_ANDA>:3000`).
 * Mendukung instalasi PWA (*Add to Home Screen*) untuk tampilan full-screen layaknya aplikasi native tanpa address bar browser.
 
@@ -98,7 +99,8 @@ Tombol cartridge 1-klik untuk meluncurkan aplikasi populer secara instan:
 2. **Ultra-Lightweight Frontend:** Zero-build static files (< 30 KB payload total), tanpa runtime framework berat (React/Tailwind/Vite dieliminasi untuk performa maksimal).
 3. **Ultra-low Latency:** Respon tombol ke TV < 50ms melalui koneksi WebSocket & raw TLS socket lokal.
 4. **Security & Privacy:** Komunikasi murni berjalan di LAN lokal antara perangkat pengguna dan TV tanpa mengirim telemetry ke internet.
-5. **Universal Developer & User Experience:**
+5. **Universal & Non-Programmer Experience:**
+   - **Non-Programmer 1-Click Launchers:** `start.command` (macOS) dan `start.bat` (Windows) dengan auto-open browser.
    - NPM: `npm run dev`
    - PNPM: `pnpm dev`
    - Yarn: `yarn dev`

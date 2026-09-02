@@ -6,6 +6,23 @@ Frontend dibangun tanpa build step (pure HTML5, CSS, dan vanilla JS berukuran < 
 
 ---
 
+## 🟢 Cara Pakai Cepat (Untuk Orang Awam / Tanpa Koding)
+
+Jika kamu bukan programmer dan tidak ingin membuka terminal atau mengetik kode, gunakan cara 3-langkah ini:
+
+1. **Jalankan Aplikasi dengan 1-Klik:**
+   - **Pengguna Mac:** Cukup klik dua kali (*Double-Click*) file **`start.command`**.
+   - **Pengguna Windows:** Cukup klik dua kali (*Double-Click*) file **`start.bat`**.
+   - *Browser laptop kamu akan otomatis terbuka sendiri ke tampilan remote.*
+2. **Buka di HP (Scan QR Code):**
+   - Di layar laptop, klik tombol **`📱 HP`** di pojok kanan atas.
+   - Arahkan kamera HP ke QR Code yang muncul di layar untuk langsung membuka remote di smartphone.
+3. **Hubungkan ke TV:**
+   - Klik tombol **`📺 DEVICES`** ➜ klik **`CONNECT`** pada TV Anda.
+   - Masukkan 6-digit kode PIN yang muncul di layar TV Anda, lalu klik **`VERIFY PIN`**. Selesai!
+
+---
+
 ## Fitur
 
 - **Zero-Build & Ringan:** Payload frontend < 30 KB tanpa framework berat (React, Vite, dan Tailwind dihapus untuk memangkas latensi dan ukuran bundle).

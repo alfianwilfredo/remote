@@ -296,6 +296,13 @@ const el = {
   btnResetBridgeUrl: document.getElementById('btnResetBridgeUrl'),
   btnSaveBridgeUrl: document.getElementById('btnSaveBridgeUrl'),
   btnWipeCredentials: document.getElementById('btnWipeCredentials'),
+
+  // Mobile QR Modal
+  btnOpenMobileQr: document.getElementById('btnOpenMobileQr'),
+  mobileQrModal: document.getElementById('mobileQrModal'),
+  btnCloseQrModal: document.getElementById('btnCloseQrModal'),
+  imgQrCode: document.getElementById('imgQrCode'),
+  textNetworkUrl: document.getElementById('textNetworkUrl'),
 };
 
 // --- 4. WebSocket Bridge Client ---
@@ -752,6 +759,37 @@ class RetroSpeechEngine {
 
 const voiceEngine = new RetroSpeechEngine();
 
+// --- 6.8 Mobile QR Code Modal Handler ---
+function openQrModal() {
+  sfx.playSelect();
+  if (el.mobileQrModal) {
+    el.mobileQrModal.style.display = 'flex';
+    const host = window.location.host || 'localhost:3000';
+    fetch(`//${host}/api/info`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.networkUrl && el.textNetworkUrl) {
+          el.textNetworkUrl.textContent = data.networkUrl;
+        }
+        if (el.imgQrCode) {
+          el.imgQrCode.src = `/api/qr?t=${Date.now()}`;
+        }
+      })
+      .catch(() => {
+        if (el.textNetworkUrl) {
+          el.textNetworkUrl.textContent = window.location.href;
+        }
+      });
+  }
+}
+
+function closeQrModal() {
+  sfx.playBack();
+  if (el.mobileQrModal) {
+    el.mobileQrModal.style.display = 'none';
+  }
+}
+
 // --- 7. Event Listeners Setup ---
 function setupEventListeners() {
   // Remote Buttons
@@ -894,6 +932,27 @@ function setupEventListeners() {
   el.btnWipeCredentials.addEventListener('click', () => {
     wipeCredentials();
   });
+
+  // Mobile QR Code Modal Listeners
+  if (el.btnOpenMobileQr) {
+    el.btnOpenMobileQr.addEventListener('click', () => {
+      openQrModal();
+    });
+  }
+
+  if (el.btnCloseQrModal) {
+    el.btnCloseQrModal.addEventListener('click', () => {
+      closeQrModal();
+    });
+  }
+
+  if (el.mobileQrModal) {
+    el.mobileQrModal.addEventListener('click', (e) => {
+      if (e.target === el.mobileQrModal) {
+        closeQrModal();
+      }
+    });
+  }
 
   // Physical Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {

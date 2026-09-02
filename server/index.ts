@@ -7,6 +7,7 @@ import { AndroidTVRemoteV2 } from './androidRemote';
 import { ADBController } from './adbController';
 import { discoverDevices } from './discovery';
 import { deleteCertificates } from './certs';
+import QRCode from 'qrcode';
 import type { DeviceInfo, ProtocolType, RemoteCommand, TVState, WSClientMessage, WSServerMessage } from './types';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -351,6 +352,34 @@ if (isBun) {
         return Response.json({ success: true, message: 'Pairing credentials wiped' }, { headers });
       }
 
+      if (url.pathname === '/api/info') {
+        const netIp = getNetworkIp();
+        const networkUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
+        return Response.json({ port: PORT, localIp: netIp, networkUrl, localUrl: `http://localhost:${PORT}` }, { headers });
+      }
+
+      if (url.pathname === '/api/qr') {
+        const netIp = getNetworkIp();
+        const targetUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
+        return (async () => {
+          try {
+            const svg = await QRCode.toString(targetUrl, {
+              type: 'svg',
+              margin: 1,
+              color: {
+                dark: '#5cd016',
+                light: '#0e0e14',
+              },
+            });
+            return new Response(svg, {
+              headers: { ...headers, 'Content-Type': 'image/svg+xml', 'Cache-Control': 'no-cache' },
+            });
+          } catch (err: any) {
+            return new Response('Error generating QR', { status: 500 });
+          }
+        })();
+      }
+
       if (url.pathname === '/api/scan') {
         const mac = url.searchParams.get('mac') || undefined;
         return (async () => {
@@ -439,6 +468,38 @@ if (isBun) {
       });
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, message: 'Pairing credentials wiped' }));
+      return;
+    }
+
+    if (pathname === '/api/info') {
+      const netIp = getNetworkIp();
+      const networkUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ port: PORT, localIp: netIp, networkUrl, localUrl: `http://localhost:${PORT}` }));
+      return;
+    }
+
+    if (pathname === '/api/qr') {
+      const netIp = getNetworkIp();
+      const targetUrl = netIp ? `http://${netIp}:${PORT}` : `http://localhost:${PORT}`;
+      try {
+        const svg = await QRCode.toString(targetUrl, {
+          type: 'svg',
+          margin: 1,
+          color: {
+            dark: '#5cd016',
+            light: '#0e0e14',
+          },
+        });
+        res.writeHead(200, {
+          'Content-Type': 'image/svg+xml',
+          'Cache-Control': 'no-cache',
+        });
+        res.end(svg);
+      } catch {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error generating QR code');
+      }
       return;
     }
 

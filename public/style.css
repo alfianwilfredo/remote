@@ -205,6 +205,17 @@ body {
   color: var(--arcade-gold);
 }
 
+.btn-micro.btn-mobile-qr {
+  background-color: #1a2a3a;
+  color: var(--crt-cyan);
+  border-color: #000;
+}
+
+.btn-micro.btn-mobile-qr:hover {
+  background-color: #243b52;
+  color: #fff;
+}
+
 .btn-micro.btn-devices {
   background-color: #d89600;
   color: #000;
