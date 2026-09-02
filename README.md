@@ -192,6 +192,16 @@ remote/
 
 ---
 
+## Batasan & Kekurangan
+
+1. **Khusus Android TV & Google TV:** Tidak mendukung Smart TV dengan OS non-Android seperti Samsung (Tizen OS), LG (webOS), Apple TV (tvOS), atau Roku TV karena masing-masing menggunakan protokol pairing dan proprietary socket yang berbeda.
+2. **Hanya Berjalan di Jaringan Lokal (LAN):** Tidak bisa mengontrol TV dari luar rumah via internet atau paket data seluler, karena komunikasi berjalan murni secara lokal (peer-to-peer LAN) tanpa server cloud perantara.
+3. **Komputer Host Harus Tetap Menyala:** Karena browser web melarang koneksi langsung raw TCP/TLS socket ke perangkat lokal (kebijakan keamanan browser), server backend bridge (`bun` atau `node`) harus tetap aktif di komputer/laptop untuk menjembatani browser/HP ke TV.
+4. **Power-On Hanya Berfungsi Saat TV Standby:** Tombol Power hanya bisa menyalakan TV jika TV berada dalam kondisi *Standby/Sleep* (modul Wi-Fi TV masih aktif). Jika kabel colokan TV dicabut atau TV mati total (*Cold Boot*), modul Wi-Fi TV mati sehingga TV harus dinyalakan manual atau via remote fisik inframerah.
+5. **Belum Ada Voice Search:** Belum mendukung transmisi stream audio mikrofon browser ke Google Assistant TV.
+
+---
+
 ## Lisensi
 
 MIT License. Bebas digunakan dan dimodifikasi untuk kebutuhan pribadi maupun pengembangan lebih lanjut.

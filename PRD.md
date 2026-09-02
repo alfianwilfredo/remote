@@ -104,6 +104,13 @@ Tombol cartridge 1-klik untuk meluncurkan aplikasi populer secara instan:
    - Bun: `bun run dev:bun` (atau `bun run dev`)
    - Standalone Binary: `./webmote`
 
+### 4.1 Batasan Sistem & Out-of-Scope
+* **Eksklusif Android/Google TV:** Tidak mendukung OS TV non-Android (Samsung Tizen, LG webOS, Apple TV, Roku).
+* **Ketergantungan Local LAN:** Komunikasi berjalan peer-to-peer di jaringan lokal tanpa dukungan cloud relay ke internet publik.
+* **Kebutuhan Server Host:** Browser tidak memiliki API raw TCP/TLS socket ke IP lokal, sehingga server bridge (Node/Bun) harus tetap aktif di host.
+* **Power-On Standby Only:** Tombol power hanya dapat membangunkan TV saat dalam mode Sleep/Standby (tidak dapat menyalakan TV dari kondisi Cold Boot / colokan mati).
+* **No Voice Assistant Streaming:** Belum mendukung transmisi audio mikrofon browser ke Google Assistant TV.
+
 ---
 
 ## 5. UI/UX Design Specifications (8-Bit Classic NES & GameBoy Pixel Art)
