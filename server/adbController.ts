@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
-import { ANDROID_KEYCODES } from '../src/utils/keycodes';
-import type { RemoteCommand } from '../src/types/remote';
+import { ANDROID_KEYCODES } from './keycodes';
+import type { RemoteCommand } from './types';
 
 export class ADBController {
   private ip: string;

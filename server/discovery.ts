@@ -2,7 +2,7 @@ import os from 'node:os';
 import net from 'node:net';
 import dgram from 'node:dgram';
 import { exec } from 'node:child_process';
-import type { DeviceInfo } from '../src/types/remote';
+import type { DeviceInfo } from './types';
 
 export interface ArpEntry {
   ip: string;

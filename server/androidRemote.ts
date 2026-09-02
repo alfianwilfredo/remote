@@ -8,8 +8,7 @@ import { RemoteManager } from 'androidtv-remote/dist/remote/RemoteManager.js';
 import { pairingMessageManager } from 'androidtv-remote/dist/pairing/PairingMessageManager.js';
 import { remoteMessageManager } from 'androidtv-remote/dist/remote/RemoteMessageManager.js';
 import CryptoJS from 'crypto-js';
-import forge from 'node-forge';
-import type { RemoteCommand } from '../types/remote';
+import type { RemoteCommand } from './types';
 
 // --- BUN COMPATIBILITY PATCH FOR PAIRINGMANAGER ---
 // Bun TLS implementation does not support client.getCertificate() and returns raw DER in getPeerCertificate().

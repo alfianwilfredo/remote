@@ -34,15 +34,6 @@ export interface TVState {
   statusMessage: string;
 }
 
-export interface AppShortcut {
-  id: string;
-  name: string;
-  packageName: string;
-  deepLink?: string;
-  color: string;
-  badge: string;
-}
-
 export interface WSClientMessage {
   type:
     | 'COMMAND'

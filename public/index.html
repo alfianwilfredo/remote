@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>WebMote - 8-Bit Pixel Android TV Remote</title>
+  <meta name="description" content="Ultra-lightweight 8-Bit Pixel Art Web Remote Control for Android TV & Google TV">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- CRT Scanline Filter Overlay -->
+  <div id="crtOverlay" class="crt-overlay active" aria-hidden="true"></div>
+
+  <!-- Main NES Remote Chassis -->
+  <main class="remote-chassis pixel-border-outer">
+    
+    <!-- Decorative Header Stripes & Title -->
+    <div class="chassis-header">
+      <div class="stripe-group">
+        <div class="stripes">
+          <div class="stripe-red"></div>
+          <div class="stripe-black"></div>
+        </div>
+        <span class="logo-title">WEBMOTE</span>
+      </div>
+      <span class="logo-edition">8-BIT EDITION</span>
+    </div>
+
+    <!-- Top Utility Toolbar -->
+    <div class="toolbar-row font-pixel">
+      <div class="status-indicator">
+        <span id="wsStatusDot" class="status-dot disconnected"></span>
+        <span id="wsStatusText">CONNECTING...</span>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="btnToggleCrt" class="btn-micro active-crt" title="Toggle Retro CRT Scanlines">
+          <span>CRT:ON</span>
+        </button>
+        <button id="btnToggleSfx" class="btn-micro active-sfx" title="Toggle 8-Bit Web Audio SFX">
+          <span>SFX:ON</span>
+        </button>
+        <button id="btnOpenDevices" class="btn-micro btn-devices" title="Open TV Devices Setup">
+          <span>📺 DEVICES</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Retro Dot-Matrix LCD Screen -->
+    <section class="pixel-screen" aria-label="TV Status Display">
+      <!-- Header / Device Name -->
+      <div class="screen-row-header">
+        <div class="screen-device-name">
+          <span id="screenRadioIcon">📻</span>
+          <span id="screenDeviceName">NO TV CONNECTED</span>
+        </div>
+        <span id="screenOnlineBadge" class="screen-badge offline">OFFLINE</span>
+      </div>
+
+      <!-- IP & Active App Grid -->
+      <div class="screen-grid">
+        <div>
+          <div class="screen-label cyan">TARGET IP:</div>
+          <div id="screenIp" class="screen-value">192.168.x.x</div>
+        </div>
+        <div>
+          <div class="screen-label gold">ACTIVE APP:</div>
+          <div id="screenApp" class="screen-value">HOME</div>
+        </div>
+      </div>
+
+      <!-- Volume & Message Footer -->
+      <div class="screen-row-footer">
+        <div>
+          <span>VOL: </span>
+          <span id="screenVol" class="screen-vol-val">[..........] 0%</span>
+        </div>
+        <div id="screenStatusMsg" class="screen-status-msg">
+          Belum terhubung ke TV.
+        </div>
+      </div>
+    </section>
+
+    <!-- Fast Text Input Box -->
+    <section class="terminal-box" aria-label="Text Input">
+      <div class="terminal-header font-pixel">
+        <span><span style="color:var(--arcade-gold);">&gt;&gt;</span> FAST TEXT INPUT</span>
+        <button id="btnAutoEnter" type="button" class="btn-micro" title="Auto send Enter after typing text">
+          <span>AUTO-ENTER: OFF</span>
+        </button>
+      </div>
+
+      <form id="formTextInput">
+        <div class="terminal-input-wrapper">
+          <input 
+            type="text" 
+            id="inputFastText" 
+            class="terminal-input" 
+            placeholder="Ketik judul / pencarian..." 
+            autocomplete="off"
+          />
+          <button type="button" id="btnClearText" class="btn-clear-text font-pixel" title="Clear text">✕</button>
+        </div>
+
+        <div class="terminal-actions" style="margin-top: 6px;">
+          <button type="button" id="btnYtSearch" class="btn-yt font-pixel" title="Cari langsung di YouTube TV">
+            <span>▶ YT SEARCH</span>
+          </button>
+          <button type="submit" id="btnSendText" class="pixel-btn-gold font-pixel" style="flex:1; padding:6px; font-size:8px; cursor:pointer;" title="Ketik langsung ke input field di TV">
+            <span>⌨ TYPE TEXT</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Center D-Pad Navigation -->
+    <section class="dpad-section" aria-label="Directional Navigation">
+      <div class="section-label-row font-pixel">
+        <span>DIRECTIONAL PAD</span>
+        <span>ARROWS / ENTER</span>
+      </div>
+
+      <div class="dpad-container pixel-border-sm">
+        <div class="dpad-cross">
+          <!-- Up Button -->
+          <button id="btnDpadUp" class="dpad-btn dpad-up pixel-btn-dark" data-cmd="UP" title="D-Pad Up (Arrow Up)">
+            <span style="color:var(--arcade-gold); font-size:12px;">▲</span>
+          </button>
+          <!-- Down Button -->
+          <button id="btnDpadDown" class="dpad-btn dpad-down pixel-btn-dark" data-cmd="DOWN" title="D-Pad Down (Arrow Down)">
+            <span style="color:var(--arcade-gold); font-size:12px;">▼</span>
+          </button>
+          <!-- Left Button -->
+          <button id="btnDpadLeft" class="dpad-btn dpad-left pixel-btn-dark" data-cmd="LEFT" title="D-Pad Left (Arrow Left)">
+            <span style="color:var(--arcade-gold); font-size:12px;">◀</span>
+          </button>
+          <!-- Right Button -->
+          <button id="btnDpadRight" class="dpad-btn dpad-right pixel-btn-dark" data-cmd="RIGHT" title="D-Pad Right (Arrow Right)">
+            <span style="color:var(--arcade-gold); font-size:12px;">▶</span>
+          </button>
+          <!-- Center OK Button -->
+          <button id="btnDpadOk" class="dpad-btn dpad-center pixel-btn-red" data-cmd="OK" title="Select / OK (Enter / Space)">
+            OK
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top System Buttons Row (POWER, HOME, BACK) -->
+    <section class="system-row" aria-label="System Buttons">
+      <button id="btnPower" class="system-btn pixel-btn-red" data-cmd="POWER" title="TV Power (P)">
+        <span>⏻ POWER</span>
+      </button>
+      <button id="btnHome" class="system-btn pixel-btn-dark" data-cmd="HOME" title="Home Screen (H)">
+        <span style="color:var(--crt-cyan);">🏠 HOME</span>
+      </button>
+      <button id="btnBack" class="system-btn pixel-btn-dark" data-cmd="BACK" title="Back / Return (Esc / Backspace)">
+        <span style="color:var(--arcade-gold);">↩ BACK</span>
+      </button>
+    </section>
+
+    <!-- Dual Control Grids: Volume & Media Playback -->
+    <section class="controls-grid" aria-label="Volume and Playback Controls">
+      <!-- Volume Rockers -->
+      <div class="control-box">
+        <div class="control-box-title font-pixel">VOLUME</div>
+        <div class="control-box-buttons">
+          <button id="btnVolDown" class="control-btn pixel-btn-dark" data-cmd="VOLUME_DOWN" title="Volume Down (-)">-</button>
+          <button id="btnMute" class="control-btn pixel-btn-dark" data-cmd="MUTE" title="Mute / Unmute (M)">🔇</button>
+          <button id="btnVolUp" class="control-btn pixel-btn-dark" data-cmd="VOLUME_UP" title="Volume Up (+)">+</button>
+        </div>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="control-box">
+        <div class="control-box-title font-pixel">PLAYBACK</div>
+        <div class="control-box-buttons">
+          <button id="btnRewind" class="control-btn pixel-btn-dark" data-cmd="REWIND" title="Rewind">⏪</button>
+          <button id="btnPlayPause" class="control-btn pixel-btn-gold" data-cmd="PLAY_PAUSE" title="Play / Pause">⏯</button>
+          <button id="btnFastForward" class="control-btn pixel-btn-dark" data-cmd="FAST_FORWARD" title="Fast Forward">⏩</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick App Cartridges Grid -->
+    <section class="cartridges-section" aria-label="App Cartridges">
+      <div class="section-label-row font-pixel">
+        <span>APP CARTRIDGES</span>
+        <span>1-CLICK LAUNCH</span>
+      </div>
+
+      <div class="cartridges-grid">
+        <button class="cartridge-btn" data-app="vnd.youtube.launch://" title="Launch YouTube">
+          <div class="cartridge-notch" style="background-color: #ff0000;"></div>
+          <span class="cartridge-badge" style="background-color: #ff0000;">YT</span>
+          <span class="cartridge-name">YOUTUBE</span>
+        </button>
+
+        <button class="cartridge-btn" data-app="netflix://" title="Launch Netflix">
+          <div class="cartridge-notch" style="background-color: #e50914;"></div>
+          <span class="cartridge-badge" style="background-color: #e50914;">NF</span>
+          <span class="cartridge-name">NETFLIX</span>
+        </button>
+
+        <button class="cartridge-btn" data-app="spotify://" title="Launch Spotify">
+          <div class="cartridge-notch" style="background-color: #1db954;"></div>
+          <span class="cartridge-badge" style="background-color: #1db954;">SP</span>
+          <span class="cartridge-name">SPOTIFY</span>
+        </button>
+
+        <button class="cartridge-btn" data-app="hotstar://" title="Launch Disney+ Hotstar">
+          <div class="cartridge-notch" style="background-color: #113ccf;"></div>
+          <span class="cartridge-badge" style="background-color: #113ccf;">D+</span>
+          <span class="cartridge-name">DISNEY+</span>
+        </button>
+
+        <button class="cartridge-btn" data-app="https://app.primevideo.com" title="Launch Prime Video">
+          <div class="cartridge-notch" style="background-color: #00a8e1;"></div>
+          <span class="cartridge-badge" style="background-color: #00a8e1;">PV</span>
+          <span class="cartridge-name">PRIME</span>
+        </button>
+
+        <button class="cartridge-btn" data-app="twitch://" title="Launch Twitch">
+          <div class="cartridge-notch" style="background-color: #9146ff;"></div>
+          <span class="cartridge-badge" style="background-color: #9146ff;">TW</span>
+          <span class="cartridge-name">TWITCH</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Laptop Physical Keyboard Shortcuts Cheatsheet -->
+    <footer class="footer-cheatsheet font-pixel">
+      <div class="cheatsheet-row">
+        <span>[ARROWS] D-PAD</span>
+        <span>[ENTER/SPACE] OK</span>
+        <span>[ESC] BACK</span>
+      </div>
+      <div class="cheatsheet-row">
+        <span>[H] HOME</span>
+        <span>[+/-] VOLUME</span>
+        <span>[M] MUTE</span>
+        <span>[P] POWER</span>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Device Discovery & PIN Pairing Modal Dialog -->
+  <div id="deviceModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-window pixel-border-outer">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title font-pixel">
+          <span>📺 TV DEVICE SETUP</span>
+        </div>
+        <button id="btnCloseModal" class="modal-btn-close font-pixel" title="Close modal">✕</button>
+      </div>
+
+      <!-- PIN Pairing Screen (Displayed when TV requests 6-digit PIN) -->
+      <div id="pinPairingView" class="pin-view" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="font-pixel" style="font-size: 10px; color: var(--arcade-gold);">🔑 ENTER 6-DIGIT PIN</span>
+          <button id="btnRequestNewPin" type="button" class="btn-micro" style="color: var(--crt-cyan);" title="Minta TV memunculkan PIN baru">
+            🔄 PIN BARU
+          </button>
+        </div>
+
+        <p id="pinInstructions" class="pin-msg font-silkscreen">
+          Lihat kode PIN yang muncul di layar TV Anda dan masukkan di bawah:
+        </p>
+
+        <div id="pinErrorBanner" class="error-banner font-pixel" style="display: none;">
+          <span id="pinErrorMessage">PIN salah atau gagal terhubung.</span>
+          <button id="btnRetryPin" type="button" class="pixel-btn-gold" style="font-size: 8px; padding: 4px; cursor: pointer; align-self: flex-start;">
+            🔄 COBA MINTA PIN BARU
+          </button>
+        </div>
+
+        <form id="formPinSubmit" style="display: flex; flex-direction: column; gap: 8px;">
+          <input 
+            type="text" 
+            id="inputPin" 
+            class="pin-input" 
+            placeholder="MISAL: 471B6C" 
+            maxlength="8" 
+            autocomplete="off"
+          />
+          <div style="display: flex; gap: 8px;">
+            <button type="button" id="btnCancelPin" class="pixel-btn-dark font-pixel" style="flex:1; padding:8px; font-size:9px; cursor:pointer;">
+              CANCEL
+            </button>
+            <button type="submit" id="btnSubmitPin" class="pixel-btn-gold font-pixel" style="flex:1; padding:8px; font-size:9px; cursor:pointer;">
+              VERIFY PIN
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Device List & Manual Connect View -->
+      <div id="deviceMainView" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Discovered on Wi-Fi Section -->
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;" class="font-pixel">
+            <span style="font-size: 9px; color: #888899;">DISCOVERED ON WI-FI:</span>
+            <button id="btnScanWifi" class="btn-micro" style="color: var(--arcade-gold); font-size: 8px;">
+              <span id="scanWifiText">🔍 SCAN WI-FI</span>
+            </button>
+          </div>
+
+          <div id="discoveredDevicesList" class="device-list">
+            <div style="padding: 12px; background-color: #14141c; border: 1px solid #000; text-align: center; font-size: 11px; color: #666;" class="font-silkscreen">
+              Scanning local network for Android TV...
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual IP Connect Form -->
+        <form id="formManualConnect" style="display: flex; flex-direction: column; gap: 8px; border-top: 2px solid #000; padding-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;" class="font-pixel">
+            <span style="font-size: 9px; color: #888899;">IP OR MAC ADDRESS:</span>
+            <span style="font-size: 8px; color: var(--crt-cyan);">MISAL: 192.168.1.20</span>
+          </div>
+
+          <div class="form-group-row">
+            <input 
+              type="text" 
+              id="inputManualIp" 
+              class="form-input" 
+              placeholder="IP (192.168.1.20) atau MAC..."
+            />
+            <select id="selectProtocol" class="form-select">
+              <option value="v2">V2 (PIN)</option>
+              <option value="adb">ADB (5555)</option>
+            </select>
+          </div>
+
+          <button type="submit" id="btnConnectManual" class="pixel-btn-gold font-pixel" style="width:100%; padding:8px; font-size:10px; cursor:pointer;">
+            CONNECT DEVICE
+          </button>
+        </form>
+
+        <!-- Bridge Server & Advanced Settings Collapsible -->
+        <div style="border-top: 2px solid #000; padding-top: 8px;">
+          <button id="btnToggleBridgeSettings" type="button" style="background:none; border:none; color:#888899; width:100%; display:flex; justify-content:space-between; font-size:8px; cursor:pointer;" class="font-pixel">
+            <span>⚙ BRIDGE SERVER SETTINGS</span>
+            <span id="bridgeSettingsArrow">► CONFIGURE</span>
+          </button>
+
+          <div id="bridgeSettingsPanel" style="display: none; margin-top: 8px; background-color: #121218; padding: 8px; border: 1px solid #000; flex-direction: column; gap: 8px;">
+            <div style="font-size: 9px; color: #a0a0ad;" class="font-silkscreen">
+              Active WebSocket Bridge: <br>
+              <span id="labelActiveWsBridge" style="color: var(--phosphor-green); word-break: break-all;">ws://localhost:3000/ws</span>
+            </div>
+
+            <input 
+              type="text" 
+              id="inputCustomBridgeUrl" 
+              class="form-input" 
+              placeholder="ws://192.168.1.x:3000/ws (kosongkan untuk default)"
+              style="font-size: 10px; padding: 4px 6px;"
+            />
+
+            <div style="display: flex; gap: 6px;">
+              <button type="button" id="btnResetBridgeUrl" class="pixel-btn-dark font-pixel" style="padding: 4px 8px; font-size: 8px; cursor: pointer;">
+                DEFAULT
+              </button>
+              <button type="button" id="btnSaveBridgeUrl" class="pixel-btn-gold font-pixel" style="flex:1; padding: 4px 8px; font-size: 8px; cursor: pointer;">
+                SAVE BRIDGE URL
+              </button>
+            </div>
+
+            <div style="border-top: 1px solid #333; padding-top: 8px; margin-top: 4px;">
+              <div style="font-size: 8px; color: #ff8080; margin-bottom: 4px;" class="font-silkscreen">
+                Reset seluruh data pairing & sertifikat TV:
+              </div>
+              <button type="button" id="btnWipeCredentials" class="pixel-btn-dark font-pixel" style="width:100%; padding:6px; font-size:8px; color:#ff8080; border:1px solid var(--nes-red); cursor:pointer;">
+                🗑 HAPUS KREDENSIAL PAIRING
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vanilla App Logic Script -->
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

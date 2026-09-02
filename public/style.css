@@ -1,0 +1,971 @@
+/* ==========================================================================
+   WebMote - 8-Bit Pixel TV Remote (Ultra-Lightweight Vanilla CSS)
+   Zero Dependencies • Pure Retro Aesthetics • High Performance
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+
+:root {
+  --nes-bg: #0e0e12;
+  --nes-chassis: #d1cfc7;
+  --nes-chassis-dark: #24242e;
+  --nes-red: #d82800;
+  --nes-red-dark: #8c1a00;
+  --nes-black: #121214;
+  --nes-grey: #6b6b78;
+  --nes-light-grey: #a0a0ad;
+  --phosphor-green: #5cd016;
+  --arcade-gold: #fcbc00;
+  --crt-cyan: #38bdf8;
+  --card-bg: #181822;
+  --input-bg: #0c1808;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--nes-bg);
+  color: #e0e0e0;
+  font-family: 'Silkscreen', monospace;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+::selection {
+  background-color: var(--arcade-gold);
+  color: #000;
+}
+
+/* Typography Utility Classes */
+.font-pixel {
+  font-family: 'Press Start 2P', monospace, cursive;
+}
+
+.font-silkscreen {
+  font-family: 'Silkscreen', monospace;
+}
+
+/* Pixel Borders & 3D Bevels */
+.pixel-border-outer {
+  box-shadow: 
+    0 -4px 0 0 #000,
+    0 4px 0 0 #000,
+    -4px 0 0 0 #000,
+    4px 0 0 0 #000,
+    0 0 0 4px #4a4a58,
+    0 8px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.pixel-border-sm {
+  box-shadow: 
+    0 -2px 0 0 #000,
+    0 2px 0 0 #000,
+    -2px 0 0 0 #000,
+    2px 0 0 0 #000;
+}
+
+/* Remote Container Chassis */
+.remote-chassis {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--nes-chassis);
+  border: 4px solid #000;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+
+/* NES Retro Header Stripes */
+.chassis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid #000;
+  padding-bottom: 8px;
+}
+
+.stripe-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stripes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stripe-red {
+  width: 48px;
+  height: 4px;
+  background-color: var(--nes-red);
+}
+
+.stripe-black {
+  width: 48px;
+  height: 4px;
+  background-color: var(--nes-black);
+}
+
+.logo-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  color: var(--nes-black);
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.logo-edition {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  color: var(--nes-grey);
+}
+
+/* Top Utility Toolbar */
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 9px;
+  color: #888899;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  background-color: var(--phosphor-green);
+}
+
+.status-dot.disconnected {
+  background-color: var(--nes-red);
+  animation: pixel-blink 1s infinite;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Micro Buttons */
+.btn-micro {
+  padding: 3px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #000;
+  background-color: #15151a;
+  color: #666;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  cursor: pointer;
+  transition: transform 0.05s ease;
+}
+
+.btn-micro:hover {
+  background-color: #22222c;
+}
+
+.btn-micro:active {
+  transform: translate(1px, 1px);
+}
+
+.btn-micro.active-crt {
+  background-color: #2b2b36;
+  color: var(--crt-cyan);
+}
+
+.btn-micro.active-sfx {
+  background-color: #2b2b36;
+  color: var(--arcade-gold);
+}
+
+.btn-micro.btn-devices {
+  background-color: #d89600;
+  color: #000;
+}
+
+.btn-micro.btn-devices:hover {
+  background-color: var(--arcade-gold);
+}
+
+/* LCD Phosphor Screen */
+.pixel-screen {
+  background-color: var(--input-bg);
+  border: 3px solid #000;
+  padding: 10px;
+  color: var(--phosphor-green);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: inset 0 0 10px rgba(92, 208, 22, 0.2);
+}
+
+.screen-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(92, 208, 22, 0.3);
+  padding-bottom: 6px;
+}
+
+.screen-device-name {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.screen-badge {
+  padding: 2px 4px;
+  font-size: 8px;
+  border: 1px solid var(--phosphor-green);
+  background: rgba(92, 208, 22, 0.1);
+  color: var(--phosphor-green);
+}
+
+.screen-badge.offline {
+  border-color: var(--nes-red);
+  background: rgba(216, 40, 0, 0.1);
+  color: var(--nes-red);
+}
+
+.screen-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 8px;
+}
+
+.screen-label {
+  font-size: 8px;
+  margin-bottom: 2px;
+}
+
+.screen-label.cyan { color: var(--crt-cyan); }
+.screen-label.gold { color: var(--arcade-gold); }
+
+.screen-value {
+  font-family: 'Silkscreen', monospace;
+  color: #fff;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.screen-row-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(92, 208, 22, 0.2);
+  padding-top: 6px;
+  font-size: 8px;
+}
+
+.screen-vol-val {
+  color: var(--arcade-gold);
+  font-family: 'Silkscreen', monospace;
+}
+
+.screen-status-msg {
+  color: rgba(92, 208, 22, 0.7);
+  font-size: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+/* Fast Text Input Box */
+.terminal-box {
+  background-color: #181820;
+  border: 2px solid #000;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 8px;
+  color: var(--phosphor-green);
+}
+
+.terminal-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-input {
+  width: 100%;
+  background-color: var(--input-bg);
+  border: 2px solid #000;
+  padding: 6px 24px 6px 8px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  color: var(--phosphor-green);
+  outline: none;
+}
+
+.terminal-input:focus {
+  border-color: var(--phosphor-green);
+}
+
+.terminal-input::placeholder {
+  color: #385c28;
+}
+
+.btn-clear-text {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  display: none;
+}
+
+.btn-clear-text.visible {
+  display: block;
+}
+
+.btn-clear-text:hover {
+  color: var(--nes-red);
+}
+
+.terminal-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-yt {
+  flex: 1;
+  padding: 6px;
+  background-color: var(--nes-red);
+  color: #fff;
+  border: 2px solid #000;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.btn-yt:hover {
+  filter: brightness(1.1);
+}
+
+.btn-yt:active {
+  transform: translateY(1px);
+}
+
+/* D-Pad Container */
+.dpad-section {
+  background-color: var(--nes-chassis-dark);
+  border: 2px solid #000;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-label-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  color: #888899;
+  margin-bottom: 6px;
+}
+
+.dpad-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  background-color: #18181e;
+  padding: 8px;
+  border: 3px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-cross {
+  position: relative;
+  width: 144px;
+  height: 144px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* D-Pad Buttons */
+.dpad-btn {
+  position: absolute;
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.dpad-up {
+  top: 0;
+  width: 48px;
+  height: 52px;
+  padding-top: 4px;
+}
+
+.dpad-down {
+  bottom: 0;
+  width: 48px;
+  height: 52px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+}
+
+.dpad-left {
+  left: 0;
+  width: 52px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 6px;
+}
+
+.dpad-right {
+  right: 0;
+  width: 52px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+}
+
+.dpad-center {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 20;
+}
+
+/* Pixel Buttons Styling */
+.pixel-btn-red {
+  background-color: var(--nes-red);
+  color: #ffffff;
+  border: none;
+  box-shadow: 
+    inset 0 3px 0 0 #ff6e4a,
+    inset 0 -3px 0 0 var(--nes-red-dark),
+    0 -3px 0 0 #000,
+    0 3px 0 0 #000,
+    -3px 0 0 0 #000,
+    3px 0 0 0 #000;
+  transition: transform 0.05s ease;
+}
+
+.pixel-btn-red:active,
+.pixel-btn-red.pressed {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    inset 0 -3px 0 0 #ff6e4a,
+    inset 0 3px 0 0 var(--nes-red-dark),
+    0 -2px 0 0 #000,
+    0 2px 0 0 #000,
+    -2px 0 0 0 #000,
+    2px 0 0 0 #000;
+}
+
+.pixel-btn-dark {
+  background-color: #1e1e24;
+  color: #d1cfc7;
+  border: none;
+  box-shadow: 
+    inset 0 3px 0 0 #3a3a46,
+    inset 0 -3px 0 0 #0e0e12,
+    0 -3px 0 0 #000,
+    0 3px 0 0 #000,
+    -3px 0 0 0 #000,
+    3px 0 0 0 #000;
+  transition: transform 0.05s ease;
+}
+
+.pixel-btn-dark:active,
+.pixel-btn-dark.pressed {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    inset 0 -3px 0 0 #3a3a46,
+    inset 0 3px 0 0 #0e0e12,
+    0 -2px 0 0 #000,
+    0 2px 0 0 #000,
+    -2px 0 0 0 #000,
+    2px 0 0 0 #000;
+}
+
+.pixel-btn-gold {
+  background-color: #d89600;
+  color: #000000;
+  border: none;
+  box-shadow: 
+    inset 0 3px 0 0 #ffe066,
+    inset 0 -3px 0 0 #8c6000,
+    0 -3px 0 0 #000,
+    0 3px 0 0 #000,
+    -3px 0 0 0 #000,
+    3px 0 0 0 #000;
+  transition: transform 0.05s ease;
+}
+
+.pixel-btn-gold:active,
+.pixel-btn-gold.pressed {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    inset 0 -3px 0 0 #ffe066,
+    inset 0 3px 0 0 #8c6000,
+    0 -2px 0 0 #000,
+    0 2px 0 0 #000,
+    -2px 0 0 0 #000,
+    2px 0 0 0 #000;
+}
+
+/* System Controls Section */
+.system-row {
+  display: flex;
+  gap: 8px;
+}
+
+.system-btn {
+  flex: 1;
+  padding: 8px 4px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+/* Dual Control Grids (Volume & Playback) */
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.control-box {
+  background-color: #181820;
+  border: 2px solid #000;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-box-title {
+  font-size: 8px;
+  color: #888899;
+  text-align: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+}
+
+.control-box-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.control-btn {
+  flex: 1;
+  padding: 6px 2px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* App Cartridges Section */
+.cartridges-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cartridges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.cartridge-btn {
+  background-color: var(--card-bg);
+  border: 2px solid #000;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  box-shadow: inset 0 2px 0 #333, inset 0 -2px 0 #000;
+  transition: transform 0.05s ease;
+}
+
+.cartridge-btn:hover {
+  background-color: #20202c;
+}
+
+.cartridge-btn:active {
+  transform: translateY(1px);
+}
+
+.cartridge-btn.active {
+  border-color: var(--arcade-gold);
+  background-color: #2a2a38;
+  box-shadow: 0 0 8px rgba(252, 188, 0, 0.4), inset 0 2px 0 #444;
+}
+
+.cartridge-notch {
+  width: 100%;
+  height: 4px;
+}
+
+.cartridge-badge {
+  padding: 2px 4px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 7px;
+  font-weight: bold;
+  color: #fff;
+  line-height: 1;
+}
+
+.cartridge-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 7px;
+  color: #e0e0e0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cheatsheet Footer */
+.footer-cheatsheet {
+  border-top: 2px solid #000;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 8px;
+  color: #555566;
+}
+
+.cheatsheet-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Modal Window */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-window {
+  width: 100%;
+  max-width: 420px;
+  max-height: 94vh;
+  overflow-y: auto;
+  background-color: #1e1e28;
+  border: 4px solid #000;
+  padding: 14px;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+}
+
+.modal-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 11px;
+  color: var(--arcade-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-btn-close {
+  background: none;
+  border: none;
+  color: var(--nes-red);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+/* PIN Pairing View */
+.pin-view {
+  background-color: #121218;
+  padding: 12px;
+  border: 2px solid var(--arcade-gold);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pin-input {
+  width: 100%;
+  background-color: var(--input-bg);
+  border: 2px solid var(--phosphor-green);
+  padding: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  text-align: center;
+  color: var(--phosphor-green);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.pin-msg {
+  font-size: 11px;
+  color: #a0a0ad;
+}
+
+.error-banner {
+  background-color: #3a1010;
+  border: 1px solid var(--nes-red);
+  padding: 8px;
+  color: #ff8080;
+  font-size: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Device List */
+.device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.device-item {
+  padding: 8px;
+  border: 2px solid #000;
+  background-color: #181822;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.device-item.active {
+  background-color: #2a2a38;
+  border-color: var(--phosphor-green);
+}
+
+.device-meta-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.device-meta-ip {
+  font-size: 9px;
+  color: var(--crt-cyan);
+}
+
+.form-group-row {
+  display: flex;
+  gap: 6px;
+}
+
+.form-input {
+  flex: 1;
+  background-color: var(--input-bg);
+  border: 2px solid #000;
+  padding: 6px 8px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  color: var(--phosphor-green);
+  outline: none;
+}
+
+.form-select {
+  background-color: #181820;
+  border: 2px solid #000;
+  padding: 6px 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: #e0e0e0;
+  outline: none;
+  cursor: pointer;
+}
+
+/* CRT Scanlines Overlay */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.04),
+    rgba(0, 255, 0, 0.02),
+    rgba(0, 0, 255, 0.04)
+  );
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+  display: none;
+}
+
+.crt-overlay.active {
+  display: block;
+}
+
+/* Blinking Animation */
+@keyframes pixel-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121216;
+  border-left: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3e3e4a;
+  border: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--arcade-gold);
+}
+
+/* Icons (SVG inline sizing) */
+.icon {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon-sm {
+  width: 10px;
+  height: 10px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  body {
+    padding: 6px;
+  }
+  .remote-chassis {
+    padding: 10px;
+    gap: 10px;
+  }
+  .dpad-container {
+    width: 140px;
+    height: 140px;
+  }
+  .dpad-cross {
+    width: 126px;
+    height: 126px;
+  }
+  .dpad-up, .dpad-down {
+    width: 42px;
+    height: 44px;
+  }
+  .dpad-left, .dpad-right {
+    width: 44px;
+    height: 42px;
+  }
+  .dpad-center {
+    width: 40px;
+    height: 40px;
+    font-size: 9px;
+  }
+}
