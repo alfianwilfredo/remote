@@ -44,7 +44,16 @@ export interface AppShortcut {
 }
 
 export interface WSClientMessage {
-  type: 'COMMAND' | 'TEXT' | 'LAUNCH_APP' | 'CONNECT' | 'DISCONNECT' | 'SCAN' | 'PAIR_PIN' | 'RESET_PAIRING';
+  type:
+    | 'COMMAND'
+    | 'TEXT'
+    | 'LAUNCH_APP'
+    | 'CONNECT'
+    | 'DISCONNECT'
+    | 'SCAN'
+    | 'PAIR_PIN'
+    | 'RESET_PAIRING'
+    | 'RESET_CREDENTIALS';
   command?: RemoteCommand;
   text?: string;
   submitEnter?: boolean;

@@ -2,36 +2,18 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import type { DeviceInfo, ProtocolType, RemoteCommand, TVState, WSClientMessage, WSServerMessage } from '../types/remote';
 import { sfx } from '../utils/sfx';
 
-const INITIAL_DEMO_STATE: TVState = {
-  connected: true,
-  activeDevice: {
-    ip: '192.168.1.DEMO',
-    name: 'Virtual TV (Simulator)',
-    protocol: 'mock',
-    paired: true,
-  },
-  volume: 45,
+const INITIAL_BLANK_STATE: TVState = {
+  connected: false,
+  activeDevice: null,
+  volume: 0,
   isMuted: false,
-  currentApp: 'HOME',
-  statusMessage: 'Virtual TV Ready (Demo Mode)',
+  currentApp: undefined,
+  statusMessage: 'Belum Terhubung ke TV',
 };
 
 export function useRemoteSocket() {
-  const [tvState, setTvState] = useState<TVState>(INITIAL_DEMO_STATE);
-  const [discoveredDevices, setDiscoveredDevices] = useState<DeviceInfo[]>([
-    {
-      ip: '192.168.1.20',
-      name: 'TV Ruang Tamu (Mi Stick)',
-      protocol: 'v2',
-      paired: false,
-    },
-    {
-      ip: '192.168.1.55',
-      name: 'Android TV Bedroom',
-      protocol: 'v2',
-      paired: false,
-    },
-  ]);
+  const [tvState, setTvState] = useState<TVState>(INITIAL_BLANK_STATE);
+  const [discoveredDevices, setDiscoveredDevices] = useState<DeviceInfo[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [pairingRequired, setPairingRequired] = useState<boolean>(false);
   const [pairingMessage, setPairingMessage] = useState<string>('');
@@ -171,42 +153,11 @@ export function useRemoteSocket() {
       if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
         send({ type: 'COMMAND', command: cmd });
       } else {
-        // Fallback: Virtual Simulator response for Vercel demo
-        setTvState((prev) => {
-          let nextVol = prev.volume;
-          let nextMute = prev.isMuted;
-          let nextMsg = prev.statusMessage;
-
-          if (cmd === 'VOLUME_UP') {
-            nextVol = Math.min(100, prev.volume + 5);
-            nextMute = false;
-            nextMsg = `Volume: ${nextVol}%`;
-          } else if (cmd === 'VOLUME_DOWN') {
-            nextVol = Math.max(0, prev.volume - 5);
-            nextMute = false;
-            nextMsg = `Volume: ${nextVol}%`;
-          } else if (cmd === 'MUTE') {
-            nextMute = !prev.isMuted;
-            nextMsg = nextMute ? 'Muted' : `Volume: ${nextVol}%`;
-          } else if (cmd === 'HOME') {
-            return { ...prev, currentApp: 'HOME', statusMessage: 'Home Screen' };
-          } else if (cmd === 'POWER') {
-            return {
-              ...prev,
-              connected: !prev.connected,
-              statusMessage: !prev.connected ? 'TV Turned ON' : 'TV in Standby',
-            };
-          } else {
-            nextMsg = `Key: ${cmd}`;
-          }
-
-          return {
-            ...prev,
-            volume: nextVol,
-            isMuted: nextMute,
-            statusMessage: nextMsg,
-          };
-        });
+        // Disconnected feedback: Notify user to connect device
+        setTvState((prev) => ({
+          ...prev,
+          statusMessage: 'NO TV CONNECTED - Buka menu DEVICES',
+        }));
       }
     },
     [send, wsConnected]
@@ -224,13 +175,9 @@ export function useRemoteSocket() {
       if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
         send({ type: 'TEXT', text, mode, submitEnter });
       } else {
-        // Simulator response
         setTvState((prev) => ({
           ...prev,
-          statusMessage:
-            mode === 'youtube_search'
-              ? `YouTube Search: "${text}"`
-              : `Typed: "${text}"`,
+          statusMessage: 'NO TV CONNECTED - Hubungkan TV dahulu',
         }));
       }
     },
@@ -244,19 +191,9 @@ export function useRemoteSocket() {
       if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
         send({ type: 'LAUNCH_APP', app: appUrlOrPkg });
       } else {
-        // Simulator response
-        let appName = 'APP';
-        if (appUrlOrPkg.includes('youtube')) appName = 'YOUTUBE';
-        else if (appUrlOrPkg.includes('netflix')) appName = 'NETFLIX';
-        else if (appUrlOrPkg.includes('spotify')) appName = 'SPOTIFY';
-        else if (appUrlOrPkg.includes('disney')) appName = 'DISNEY+';
-        else if (appUrlOrPkg.includes('prime')) appName = 'PRIME VIDEO';
-        else if (appUrlOrPkg.includes('twitch')) appName = 'TWITCH';
-
         setTvState((prev) => ({
           ...prev,
-          currentApp: appName,
-          statusMessage: `Launched ${appName}`,
+          statusMessage: 'NO TV CONNECTED - Hubungkan TV dahulu',
         }));
       }
     },
@@ -271,13 +208,7 @@ export function useRemoteSocket() {
       } else {
         setTvState((prev) => ({
           ...prev,
-          activeDevice: {
-            ip,
-            name: ip === '192.168.1.20' ? 'TV Ruang Tamu (Mi Stick)' : `Android TV (${ip})`,
-            protocol,
-            paired: true,
-          },
-          statusMessage: `Simulating connection to ${ip}...`,
+          statusMessage: 'Bridge Offline. Pastikan bun run server/index.ts aktif.',
         }));
       }
     },
@@ -293,15 +224,8 @@ export function useRemoteSocket() {
       if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
         send({ type: 'PAIR_PIN', pin });
       } else {
-        setTimeout(() => {
-          setIsPairingSubmitting(false);
-          setPairingRequired(false);
-          sfx.playCartridge();
-          setTvState((prev) => ({
-            ...prev,
-            statusMessage: 'Pairing Successful! (Demo)',
-          }));
-        }, 800);
+        setIsPairingSubmitting(false);
+        setErrorMessage('Bridge server belum terhubung. Jalankan server lokal.');
       }
     },
     [send, wsConnected]
@@ -312,11 +236,7 @@ export function useRemoteSocket() {
     if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
       send({ type: 'DISCONNECT' });
     } else {
-      setTvState((prev) => ({
-        ...prev,
-        connected: false,
-        statusMessage: 'Disconnected',
-      }));
+      setTvState(INITIAL_BLANK_STATE);
     }
   }, [send, wsConnected]);
 
@@ -346,6 +266,18 @@ export function useRemoteSocket() {
     }
   }, [send, wsConnected]);
 
+  const wipeCredentials = useCallback(() => {
+    setIsPairingSubmitting(false);
+    setErrorMessage('');
+    setPairingRequired(false);
+    sfx.playBack();
+    if (wsConnected && socketRef.current?.readyState === WebSocket.OPEN) {
+      send({ type: 'RESET_CREDENTIALS' });
+    } else {
+      setTvState(INITIAL_BLANK_STATE);
+    }
+  }, [send, wsConnected]);
+
   return {
     tvState,
     wsConnected,
@@ -362,6 +294,7 @@ export function useRemoteSocket() {
     connectDevice,
     submitPin,
     resetPairing,
+    wipeCredentials,
     disconnectDevice,
     scanDevices,
     bridgeUrl,

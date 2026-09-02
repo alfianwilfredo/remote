@@ -77,8 +77,6 @@ export async function discoverDevices(targetMacOrIp?: string): Promise<DeviceInf
     }
   }
 
-  candidateIps.add('192.168.1.20');
-
   const subnetIps = getLocalSubnetIps();
   for (const ip of subnetIps.slice(0, 30)) {
     candidateIps.add(ip);
@@ -96,7 +94,7 @@ export async function discoverDevices(targetMacOrIp?: string): Promise<DeviceInf
     if (eurekaName || isV2 || isAdb) {
       const matchedArp = arpEntries.find((e) => e.ip === ip);
       const macStr = matchedArp ? ` (${matchedArp.mac})` : '';
-      const deviceName = eurekaName || (ip === '192.168.1.20' ? 'TV Ruang Tamu' : `Android TV ${ip}`);
+      const deviceName = eurekaName || `Android TV (${ip})`;
 
       discovered.set(ip, {
         ip,

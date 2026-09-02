@@ -53,3 +53,16 @@ export function getOrCreateCertificates(): StoredCerts {
 
   return stored;
 }
+
+export function deleteCertificates(): boolean {
+  try {
+    if (fs.existsSync(CERT_PATH)) {
+      fs.unlinkSync(CERT_PATH);
+      console.log('[Certs] Deleted stored certificates (.webmote-certs.json)');
+      return true;
+    }
+  } catch (err) {
+    console.error('[Certs] Failed to delete certs file:', err);
+  }
+  return false;
+}

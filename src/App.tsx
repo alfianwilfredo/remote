@@ -27,6 +27,7 @@ export const App: React.FC = () => {
     connectDevice,
     submitPin,
     resetPairing,
+    wipeCredentials,
     scanDevices,
     bridgeUrl,
     effectiveBridgeUrl,
@@ -90,6 +91,7 @@ export const App: React.FC = () => {
         onSubmitPin={submitPin}
         onCancelPairing={() => setPairingRequired(false)}
         onResetPairing={resetPairing}
+        onWipeCredentials={wipeCredentials}
         currentDevice={tvState.activeDevice}
         bridgeUrl={bridgeUrl}
         effectiveBridgeUrl={effectiveBridgeUrl}

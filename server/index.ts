@@ -1,6 +1,7 @@
 import { AndroidTVRemoteV2 } from './androidRemote';
 import { ADBController } from './adbController';
 import { discoverDevices } from './discovery';
+import { deleteCertificates } from './certs';
 import type { DeviceInfo, ProtocolType, RemoteCommand, TVState, WSClientMessage, WSServerMessage } from '../src/types/remote';
 
 const PORT = 3001;
@@ -11,10 +12,10 @@ let currentAdb: ADBController | null = null;
 let tvState: TVState = {
   connected: false,
   activeDevice: null,
-  volume: 24,
+  volume: 0,
   isMuted: false,
-  currentApp: 'HOME',
-  statusMessage: 'Ready to connect to Android TV',
+  currentApp: undefined,
+  statusMessage: 'Bridge Ready. Belum terhubung ke TV.',
 };
 
 const clients = new Set<any>();
@@ -52,7 +53,7 @@ function connectToDevice(ip: string, protocol: ProtocolType = 'v2', forceFresh: 
 
   const device: DeviceInfo = {
     ip,
-    name: ip === '192.168.1.20' ? 'TV Ruang Tamu (Mi Stick)' : `Android TV (${ip})`,
+    name: `Android TV (${ip})`,
     protocol,
     paired: false,
   };
@@ -187,19 +188,6 @@ async function handlePin(pin: string) {
   }
 }
 
-// Initial Auto-Discovery on Server Startup
-setTimeout(async () => {
-  console.log('[Bridge Server] Performing initial auto-discovery...');
-  const devices = await discoverDevices('70:3E:97:89:71:63');
-  if (devices.length > 0) {
-    console.log(`[Bridge Server] Auto-connecting to primary TV: ${devices[0].name} (${devices[0].ip})`);
-    connectToDevice(devices[0].ip, devices[0].protocol);
-  } else {
-    console.log('[Bridge Server] Auto-targeting 192.168.1.20');
-    connectToDevice('192.168.1.20', 'v2');
-  }
-}, 1000);
-
 // Start Bun native server
 const server = Bun.serve({
   port: PORT,
@@ -224,6 +212,23 @@ const server = Bun.serve({
 
     if (url.pathname === '/api/status') {
       return Response.json(tvState, { headers });
+    }
+
+    if (url.pathname === '/api/reset') {
+      if (currentRemote) currentRemote.disconnect();
+      if (currentAdb) currentAdb.disconnect();
+      currentRemote = null;
+      currentAdb = null;
+      deleteCertificates();
+      updateState({
+        connected: false,
+        activeDevice: null,
+        volume: 0,
+        isMuted: false,
+        currentApp: undefined,
+        statusMessage: 'Kredensial pairing telah direset. Siap koneksi baru.',
+      });
+      return Response.json({ success: true, message: 'Pairing credentials wiped' }, { headers });
     }
 
     if (url.pathname === '/api/scan') {
@@ -279,6 +284,26 @@ const server = Bun.serve({
             } else if (tvState.activeDevice?.ip) {
               connectToDevice(tvState.activeDevice.ip, 'v2', true);
             }
+            break;
+          case 'RESET_CREDENTIALS':
+            console.log('[Bridge Server] Wiping all pairing credentials...');
+            if (currentRemote) currentRemote.disconnect();
+            if (currentAdb) currentAdb.disconnect();
+            currentRemote = null;
+            currentAdb = null;
+            deleteCertificates();
+            updateState({
+              connected: false,
+              activeDevice: null,
+              volume: 0,
+              isMuted: false,
+              currentApp: undefined,
+              statusMessage: 'Kredensial pairing telah direset. Siap koneksi baru.',
+            });
+            broadcast({
+              type: 'LOG',
+              message: 'Semua kredensial pairing (.webmote-certs.json) berhasil dihapus.',
+            });
             break;
           case 'SCAN':
             discoverDevices(data.text).then((devices) => {

@@ -21,6 +21,7 @@ interface DeviceModalProps {
   bridgeUrl?: string;
   effectiveBridgeUrl?: string;
   onSaveBridgeUrl?: (url: string) => void;
+  onWipeCredentials?: () => void;
 }
 
 export const DeviceModal: React.FC<DeviceModalProps> = ({
@@ -41,6 +42,7 @@ export const DeviceModal: React.FC<DeviceModalProps> = ({
   bridgeUrl = '',
   effectiveBridgeUrl = '',
   onSaveBridgeUrl,
+  onWipeCredentials,
 }) => {
   const [manualIp, setManualIp] = useState('');
   const [protocol, setProtocol] = useState<ProtocolType>('v2');
@@ -48,6 +50,7 @@ export const DeviceModal: React.FC<DeviceModalProps> = ({
   const [showBridgeSettings, setShowBridgeSettings] = useState(false);
   const [customBridgeInput, setCustomBridgeInput] = useState(bridgeUrl);
   const [bridgeSavedToast, setBridgeSavedToast] = useState(false);
+  const [wipeConfirmedToast, setWipeConfirmedToast] = useState(false);
 
   if (!isOpen) return null;
 
@@ -313,6 +316,25 @@ export const DeviceModal: React.FC<DeviceModalProps> = ({
                       <span>{bridgeSavedToast ? 'SAVED!' : 'SAVE BRIDGE URL'}</span>
                     </button>
                   </div>
+
+                  {onWipeCredentials && (
+                    <div className="border-t border-black/50 pt-2 mt-1 flex flex-col gap-1.5">
+                      <div className="text-[8px] font-silkscreen text-[#ff8080]">
+                        Hapus sertifikat TV & histori koneksi:
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onWipeCredentials();
+                          setWipeConfirmedToast(true);
+                          setTimeout(() => setWipeConfirmedToast(false), 2500);
+                        }}
+                        className="w-full py-1.5 border border-[#d82800] bg-[#3a1010] hover:bg-[#501515] text-[#ff8080] font-pixel text-[8px] flex items-center justify-center gap-1 cursor-pointer active:translate-y-[1px]"
+                      >
+                        {wipeConfirmedToast ? '✓ KREDENSIAL DIHAPUS!' : '🗑 HAPUS KREDENSIAL PAIRING (RESET DARI AWAL)'}
+                      </button>
+                    </div>
+                  )}
                 </form>
               )}
             </div>
