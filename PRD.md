@@ -39,6 +39,11 @@ Aplikasi ini menggunakan arsitektur **Universal Hybrid Single-Port Engine**:
 * **Single Port Unification:** Menyajikan antarmuka frontend statis (`/`), REST API (`/api/*`), dan WebSocket bridge (`/ws`) pada 1 port tunggal (default `:3000`), mengeliminasi isu CORS dan kebutuhan multi-process dev server.
 * **Standalone Binary:** Dapat dikompilasi menjadi satu file executable mandiri (`./webmote`) menggunakan `bun run build:binary`.
 
+### 2.3 Dual-Band Wi-Fi (2.4 GHz vs 5 GHz) & Network Routing
+* **Subnet Bridging Support:** Mendukung skenario di mana Smart TV terhubung ke pita 2.4 GHz dan perangkat pengontrol (Laptop / Smartphone) terhubung ke pita 5 GHz pada router dual-band yang sama (subnet IP sama, misal `192.168.1.0/24`).
+* **mDNS & Multicast Fallback:** Jika paket multicast mDNS terisolasi antar pita 2.4G dan 5G oleh router, sistem menyediakan fallback koneksi langsung menggunakan input IP manual dan probe ARP.
+* **AP Isolation / Client Isolation Handling:** Dokumentasi panduan konfigurasi router untuk menonaktifkan *AP Isolation* dan menghindari *Guest Wi-Fi*.
+
 ---
 
 ## 3. Fitur Utama (Core Functional Requirements)

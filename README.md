@@ -14,6 +14,10 @@ Aplikasi remote control web berkecepatan tinggi, **100% bebas iklan (*ad-free*)*
 
 - [⚡ Fitur Unggulan](#-fitur-unggulan)
 - [📋 Persyaratan Sistem](#-persyaratan-sistem)
+- [📶 Panduan Jaringan Wi-Fi: 2.4 GHz vs 5 GHz (Dual-Band)](#-panduan-jaringan-wi-fi-24-ghz-vs-5-ghz-dual-band)
+  - [1. Mengapa TV di 2.4 GHz dan HP/Laptop di 5 GHz?](#1-mengapa-tv-di-24-ghz-dan-hplaptop-di-5-ghz)
+  - [2. Bagaimana Komunikasi Berjalan (Subnet Bridging)](#2-bagaimana-komunikasi-berjalan-subnet-bridging)
+  - [3. Masalah Umum Wi-Fi & Cara Mengatasinya](#3-masalah-umum-wi-fi--cara-mengatasinya)
 - [🚀 Cara Instalasi & Menjalankan](#-cara-instalasi--menjalankan)
   - [1. Menggunakan NPM](#1-menggunakan-npm)
   - [2. Menggunakan PNPM](#2-menggunakan-pnpm)
@@ -58,6 +62,47 @@ Sebelum menjalankan WebMote, pastikan:
    - **Bun** v1.0.0 atau lebih baru ([Unduh Bun](https://bun.sh/)).
 2. **Jaringan:** Laptop/komputer dan Android TV terhubung ke **jaringan Wi-Fi / LAN yang sama**.
 3. **Target Perangkat:** TV berbasis **Android TV** atau **Google TV** (Xiaomi TV, TCL, Sony Bravia, Realme, Chromecast with Google TV, Coocaa, Polytron, dll.).
+
+---
+
+## 📶 Panduan Jaringan Wi-Fi: 2.4 GHz vs 5 GHz (Dual-Band)
+
+Banyak pengguna menggunakan router Wi-Fi modern (Dual-Band) di rumah (IndiHome, MyRepublic, Biznet, First Media, XL Home, TP-Link, ASUS, Huawei, ZTE, dll.). Memahami cara kerja frekuensi Wi-Fi sangat penting agar WebMote dapat terhubung ke TV dengan lancar.
+
+```
+                  +-------------------------------------------------+
+                  |          ROUTER WI-FI DUAL-BAND RUMAH           |
+                  |             (Subnet: 192.168.1.1/24)            |
+                  +------------------------+------------------------+
+                                           |
+                 +-------------------------+-------------------------+
+                 | (Jaringan 2.4 GHz)                                | (Jaringan 5 GHz)
+                 v                                                   v
+    +--------------------------+                        +--------------------------+
+    |       Android TV         | <====================> |      Laptop / HP         |
+    |   (IP: 192.168.1.25)     |   Komunikasi LAN /     |    (IP: 192.168.1.3)     |
+    |  Modul Wi-Fi 2.4 GHz     |   WebSocket & TLS      |   Modul Wi-Fi 5 GHz      |
+    +--------------------------+                        +--------------------------+
+```
+
+### 1. Mengapa TV di 2.4 GHz dan HP/Laptop di 5 GHz?
+* **Smart TV (2.4 GHz):** Mayoritas Smart TV (terutama entry-level & mid-range) hanya memiliki modul Wi-Fi 2.4 GHz karena frekuensi 2.4 GHz memiliki daya tembus dinding yang lebih baik untuk posisi TV yang statis.
+* **Laptop & Smartphone (5 GHz):** Laptop dan HP modern biasanya otomatis terhubung ke frekuensi 5 GHz untuk kecepatan transfer data yang lebih tinggi.
+
+### 2. Bagaimana Komunikasi Berjalan (Subnet Bridging)
+**Apakah Laptop di 5 GHz bisa mengontrol TV di 2.4 GHz?**
+👉 **BISA 100%!** Pada router normal, frekuensi 2.4 GHz dan 5 GHz **dijembatani (*bridged*)** ke dalam subnet IP yang sama (misal sama-sama mendapat IP `192.168.1.xxx`). Selama kedua perangkat berada di subnet yang sama, WebMote dapat mengirimkan perintah kontrol tanpa masalah.
+
+---
+
+### 3. Masalah Umum Wi-Fi & Cara Mengatasinya
+
+| Kondisi / Masalah | Penyebab | Solusi Praktis |
+| :--- | :--- | :--- |
+| **Router Memiliki 2 Nama Wi-Fi Berbeda** *(misal: `MyWiFi_2.4G` & `MyWiFi_5G`)* | Sebagian router membatasi komunikasi antar dua nama SSID ini jika fitur bridging tidak aktif. | **Solusi:** Sambungkan Laptop/HP ke nama Wi-Fi yang **sama persis** dengan yang dipakai oleh TV (misal: keduanya disambungkan ke `MyWiFi_2.4G`). |
+| **Fitur "AP Isolation" / "Client Isolation" Aktif di Router** | Router sengaja mengunci setiap perangkat agar tidak bisa saling "melihat" satu sama lain (sering aktif di router kos/kantor/kafe). | **Solusi:** Masuk ke halaman admin router (biasanya `http://192.168.1.1`), cari menu **Wireless ➜ Advanced**, dan ubah **AP Isolation** atau **Client Isolation** menjadi **Disabled / Off**. |
+| **Menggunakan Wi-Fi Tamu (*Guest Network*)** | Jaringan *Guest Wi-Fi* memang didesain hanya untuk akses internet dan memblokir seluruh koneksi lokal antar-perangkat. | **Solusi:** Pastikan Laptop, HP, dan Android TV terhubung ke **Wi-Fi Utama**, bukan ke Wi-Fi Tamu (*Guest*). |
+| **mDNS Discovery Terblokir (Auto-Scan Tidak Muncul)** | Beberapa router memblokir paket multicast mDNS antar-frekuensi 2.4G dan 5G sehingga tombol "SCAN WI-FI" tidak menemukan TV. | **Solusi:** Buka menu **`DEVICES`** di WebMote, lalu masukkan alamat IP TV secara **Manual** di kolom input (misal: `192.168.1.20`) dan klik **`CONNECT DEVICE`**. |
 
 ---
 
@@ -239,11 +284,12 @@ Anda dapat mengontrol TV secara langsung menggunakan keyboard fisik laptop tanpa
 ## 🔧 Panduan Troubleshooting (Masalah Umum & Solusi)
 
 ### 1. TV Tidak Ditemukan Saat Menekan "SCAN WI-FI"
-- **Penyebab:** Router Wi-Fi Anda mungkin memblokir paket mDNS/Multicast antar-perangkat (fitur *AP Isolation* / *Client Isolation*).
+- **Penyebab:** Router Wi-Fi Anda mungkin memblokir paket mDNS/Multicast antar-frekuensi 2.4 GHz dan 5 GHz, atau fitur *AP Isolation* aktif.
 - **Solusi:** 
   1. Cari tahu IP TV Anda melalui menu TV: **Settings ➜ Network & Internet ➜ Wi-Fi yang terhubung ➜ IP Address** (misal: `192.168.1.25`).
   2. Buka dialog **`DEVICES`** di WebMote.
   3. Masukkan IP tersebut ke form **"IP OR MAC ADDRESS"** dan klik **`CONNECT DEVICE`**.
+  4. Periksa apakah Laptop dan TV terhubung ke Wi-Fi yang sama (lihat [Panduan Wi-Fi Dual-Band](#-panduan-jaringan-wi-fi-24-ghz-vs-5-ghz-dual-band)).
 
 ### 2. Kode PIN Salah atau Sesi Pairing Kedaluwarsa
 - **Penyebab:** Kode PIN di TV memiliki batas waktu (biasanya 30-60 detik).
