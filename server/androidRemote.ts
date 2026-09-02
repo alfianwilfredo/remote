@@ -236,40 +236,70 @@ import type { RemoteCommand } from './types';
 
 const CERT_STORE_FILE = path.resolve(process.cwd(), '.webmote-certs.json');
 
-function loadStoredCertificate(): any | undefined {
+interface CertStore {
+  devices?: Record<string, { cert: any; key: any }>;
+  cert?: any;
+  key?: any;
+}
+
+function readCertStore(): CertStore {
   try {
     if (fs.existsSync(CERT_STORE_FILE)) {
       const content = fs.readFileSync(CERT_STORE_FILE, 'utf-8');
-      const data = JSON.parse(content);
-      if (data && data.cert && data.key) {
-        console.log('[AndroidRemote] Loaded existing certificate from .webmote-certs.json');
-        return data;
-      }
+      return JSON.parse(content) || {};
     }
   } catch (err) {
-    console.warn('[AndroidRemote] Failed to read stored certificate:', err);
+    console.warn('[AndroidRemote] Failed to read stored certificate store:', err);
+  }
+  return {};
+}
+
+function writeCertStore(store: CertStore) {
+  try {
+    fs.writeFileSync(CERT_STORE_FILE, JSON.stringify(store, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[AndroidRemote] Error writing certificate store:', err);
+  }
+}
+
+export function loadStoredCertificate(ip?: string): any | undefined {
+  const store = readCertStore();
+  if (ip && store.devices && store.devices[ip]) {
+    console.log(`[AndroidRemote] Loaded existing certificate for device IP ${ip} from .webmote-certs.json`);
+    return store.devices[ip];
+  }
+  if (!ip && store.cert && store.key) {
+    return { cert: store.cert, key: store.key };
   }
   return undefined;
 }
 
-function saveCertificate(cert: any) {
-  try {
-    fs.writeFileSync(CERT_STORE_FILE, JSON.stringify(cert, null, 2), 'utf-8');
-    console.log('[AndroidRemote] Certificate successfully saved to .webmote-certs.json');
-  } catch (err) {
-    console.error('[AndroidRemote] Error saving certificate:', err);
-  }
+export function saveCertificate(ip: string, cert: any) {
+  const store = readCertStore();
+  if (!store.devices) store.devices = {};
+  store.devices[ip] = cert;
+  store.cert = cert.cert;
+  store.key = cert.key;
+  writeCertStore(store);
+  console.log(`[AndroidRemote] Certificate successfully saved for device IP ${ip} to .webmote-certs.json`);
 }
 
-export function clearStoredCertificate() {
+export function clearStoredCertificate(ip?: string) {
   try {
     if (fs.existsSync(CERT_STORE_FILE)) {
+      if (ip) {
+        const store = readCertStore();
+        if (store.devices && store.devices[ip]) {
+          delete store.devices[ip];
+          writeCertStore(store);
+          console.log(`[AndroidRemote] Cleared stored certificate for ${ip}`);
+          return;
+        }
+      }
       fs.unlinkSync(CERT_STORE_FILE);
-      console.log('[AndroidRemote] Cleared stored .webmote-certs.json');
+      console.log('[AndroidRemote] Cleared all stored certificates (.webmote-certs.json)');
     }
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 const KEYCODE_MAP: Record<RemoteCommand, number> = {
@@ -296,6 +326,8 @@ export class AndroidTVRemoteV2 {
   private ip: string;
   private remote: any = null;
   private isConnected: boolean = false;
+  private isPairing: boolean = false;
+  private autoPairingTriggered: boolean = false;
   private onStateChange: (connected: boolean, message: string) => void;
   private onPairingRequired: () => void;
   private onVolumeChange?: (level: number, max: number, muted: boolean) => void;
@@ -320,16 +352,29 @@ export class AndroidTVRemoteV2 {
     return this.isConnected;
   }
 
+  public clearAndPair() {
+    if (this.autoPairingTriggered) return;
+    this.autoPairingTriggered = true;
+    console.log(`[AndroidRemote] Auto-Recovery: Switching to fresh PIN pairing for ${this.ip} on port 6467...`);
+    clearStoredCertificate(this.ip);
+    this.disconnect();
+    setTimeout(() => {
+      this.connect(true);
+    }, 150);
+  }
+
   public connect(forceFresh: boolean = false) {
     this.disconnect();
 
     if (forceFresh) {
-      clearStoredCertificate();
+      clearStoredCertificate(this.ip);
+    } else {
+      this.autoPairingTriggered = false;
     }
 
-    const storedCert = forceFresh ? undefined : loadStoredCertificate();
+    const storedCert = forceFresh ? undefined : loadStoredCertificate(this.ip);
 
-    console.log(`[AndroidRemote] Initializing connection to ${this.ip} (fresh=${forceFresh})...`);
+    console.log(`[AndroidRemote] Initializing connection to ${this.ip} (fresh=${forceFresh}, hasCert=${Boolean(storedCert)})...`);
     this.onStateChange(false, `Connecting to TV (${this.ip})...`);
 
     const options: any = {
@@ -347,6 +392,7 @@ export class AndroidTVRemoteV2 {
 
       this.remote.on('secret', () => {
         console.log(`[AndroidRemote] TV displayed PIN Code on screen.`);
+        this.isPairing = true;
         this.onStateChange(false, 'Masukkan 6 digit kode PIN dari layar TV');
         this.onPairingRequired();
       });
@@ -354,9 +400,11 @@ export class AndroidTVRemoteV2 {
       this.remote.on('ready', () => {
         console.log(`[AndroidRemote] TV connection is READY!`);
         this.isConnected = true;
+        this.isPairing = false;
+        this.autoPairingTriggered = false;
         const cert = this.remote.getCertificate();
         if (cert) {
-          saveCertificate(cert);
+          saveCertificate(this.ip, cert);
         }
         this.onStateChange(true, `Connected to TV (${this.ip})`);
       });
@@ -369,22 +417,40 @@ export class AndroidTVRemoteV2 {
       });
 
       this.remote.on('error', (error: any) => {
-        console.warn(`[AndroidRemote] Error:`, error);
+        const errMsg = String(error?.message || error || '');
+        console.warn(`[AndroidRemote] Error on ${this.ip}:`, errMsg);
+
+        // Auto-recovery: If TV rejects certificate with SSL alert 46 or certificate unknown
+        if (
+          !this.isConnected &&
+          storedCert &&
+          (errMsg.includes('certificate unknown') ||
+            errMsg.includes('alert number 46') ||
+            errMsg.includes('SSL alert') ||
+            errMsg.includes('alert') ||
+            errMsg.includes('ECONNRESET'))
+        ) {
+          console.log(`[AndroidRemote] TV (${this.ip}) rejected existing certificate. Initiating fresh PIN pairing...`);
+          this.clearAndPair();
+          return;
+        }
+
         this.isConnected = false;
-        this.onStateChange(false, `Connection error: ${error?.message || error}`);
+        this.onStateChange(false, `Connection error: ${errMsg}`);
       });
 
       this.remote.on('unpaired', () => {
         console.log(`[AndroidRemote] TV session unpaired.`);
         this.isConnected = false;
-        this.onStateChange(false, 'TV memerlukan pairing ulang');
-        this.onPairingRequired();
+        this.clearAndPair();
       });
 
       this.remote.on('close', () => {
-        console.log(`[AndroidRemote] Connection closed.`);
+        console.log(`[AndroidRemote] Connection closed on ${this.ip}.`);
         this.isConnected = false;
-        this.onStateChange(false, 'Disconnected from TV');
+        if (!this.autoPairingTriggered) {
+          this.onStateChange(false, 'Disconnected from TV');
+        }
       });
 
       this.remote.start();
